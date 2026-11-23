@@ -1,0 +1,6 @@
+.venv/
+qr_lost_found/.env
+qr_lost_found/db.sqlite3
+qr_lost_found/staticfiles/
+**/__pycache__/
+*.py[cod]

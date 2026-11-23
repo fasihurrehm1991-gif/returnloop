@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Stickers | ReturnLoop{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <span class="badge rounded-pill px-3 py-2 mb-3"
+              style="background:#d8eee0; color:#087f5b;">
+            RETURNLOOP STORE
+        </span>
+
+        <h1 class="fw-bold mb-3" style="color:#10372b;">
+            Get Your ReturnLoop Stickers
+        </h1>
+
+        <p class="mx-auto"
+           style="max-width:600px; color:#637b6e;">
+            Order your personalized ReturnLoop QR stickers and attach
+            them to your belongings. Anyone who finds your belongings
+            can scan the QR code to notify you.
+        </p>
+
+    </div>
+
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8 col-md-10">
+
+            <div class="card border-0 shadow-lg"
+                 style="border-radius:22px; overflow:hidden;">
+
+                <div class="p-4 p-md-5">
+
+                    <h4 class="fw-bold mb-2"
+                        style="color:#10372b;">
+                        Place Your Order
+                    </h4>
+
+                    <p class="mb-4"
+                       style="color:#637b6e;">
+                        Choose your preferred sticker package.
+                    </p>
+
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        <label class="form-label fw-semibold mb-3">
+                            Select Sticker Package
+                        </label>
+
+
+                        <div class="row g-3 mb-4">
+
+                            {% for value, label in packages %}
+
+                                <div class="col-md-4">
+
+                                    <label class="package-card w-100 h-100">
+
+                                        <input
+                                            type="radio"
+                                            name="package"
+                                            value="{{ value }}"
+                                            class="package-radio"
+                                            required
+                                            {% if value == 'single' %}
+                                                checked
+                                            {% endif %}
+                                        >
+
+                                        <div class="package-option h-100 p-3 text-center">
+
+                                            <span class="selection-check">
+                                                ✓
+                                            </span>
+
+                                            <div class="mb-3 package-icon">
+
+                                                {% if value == 'single' %}
+                                                    🏷️
+                                                {% elif value == 'three' %}
+                                                    📦
+                                                {% else %}
+                                                    🎁
+                                                {% endif %}
+
+                                            </div>
+
+
+                                            <h6 class="fw-bold mb-2"
+                                                style="color:#10372b;">
+
+                                                {{ label }}
+
+                                            </h6>
+
+
+                                            <small style="color:#637b6e;">
+
+                                                {% if value == 'single' %}
+                                                    One sticker
+                                                {% elif value == 'three' %}
+                                                    Three stickers
+                                                {% else %}
+                                                    Five stickers
+                                                {% endif %}
+
+                                            </small>
+
+
+                                            <div class="selected-text mt-3">
+                                                SELECTED
+                                            </div>
+
+                                        </div>
+
+                                    </label>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="mb-4">
+
+                            <label for="quantity"
+                                   class="form-label fw-semibold">
+
+                                Number of Packages
+
+                            </label>
+
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="quantity"
+                                name="quantity"
+                                min="1"
+                                max="50"
+                                value="1"
+                                required
+                                style="
+                                padding:13px;
+                                border-radius:12px;
+                                border:1px solid #cbded1;
+                                "
+                            >
+
+                            <small style="color:#637b6e;">
+
+                                You can order between 1 and 50 packages.
+
+                            </small>
+
+                        </div>
+
+
+                        <div class="p-3 mb-4"
+                             style="
+                             background:#edf6ef;
+                             border-radius:13px;
+                             border:1px solid #d5e9da;
+                             ">
+
+                            <div class="d-flex gap-3">
+
+                                <span style="font-size:22px;">🔒</span>
+
+                                <div>
+
+                                    <h6 class="fw-bold mb-1"
+                                        style="color:#10372b;">
+
+                                        Your QR Code Stays Private
+
+                                    </h6>
+
+                                    <p class="mb-0 small"
+                                       style="color:#637b6e;">
+
+                                        Your QR sticker is generated and
+                                        physically issued by our admin team.
+                                        It will not be automatically
+                                        displayed or downloaded from
+                                        your account.
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="btn w-100 text-white fw-semibold py-3 order-submit-button"
+                        >
+
+                            Place Order →
+
+                        </button>
+
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <div class="text-center mt-4">
+
+                <a href="{% url 'dashboard' %}"
+                   class="text-decoration-none fw-semibold"
+                   style="color:#087f5b;">
+
+                    ← Back to Dashboard
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<style>
+
+/* Package Card */
+
+.package-card {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    height: 100%;
+}
+
+
+/* Hide Original Radio Button */
+
+.package-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+/* Default Package Design */
+
+.package-option {
+    position: relative;
+    border: 2px solid #cbded1;
+    border-radius: 16px;
+    background: #f8fcf9;
+    padding: 25px 15px !important;
+    transition: all 0.25s ease;
+    min-height: 175px;
+}
+
+
+/* Hover Effect */
+
+.package-card:hover .package-option {
+    border-color: #087f5b;
+    background: #edf6ef;
+    transform: translateY(-3px);
+}
+
+
+/* Selected Package */
+
+.package-card.selected .package-option {
+    border: 2px solid #087f5b;
+    background: #e5f3e9;
+    box-shadow: 0 5px 16px rgba(8, 127, 91, 0.12);
+    transform: translateY(-3px);
+}
+
+
+/* Selection Checkmark */
+
+.selection-check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 25px;
+    height: 25px;
+    background: #087f5b;
+    color: white;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+/* Show Checkmark When Selected */
+
+.package-card.selected .selection-check {
+    display: flex;
+}
+
+
+/* Package Icon */
+
+.package-icon {
+    font-size: 32px;
+}
+
+
+/* Selected Text */
+
+.selected-text {
+    display: none;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #087f5b;
+}
+
+
+.package-card.selected .selected-text {
+    display: block;
+}
+
+
+/* Submit Button */
+
+.order-submit-button {
+    background: #087f5b;
+    border-radius: 12px;
+    border: none;
+    transition: all 0.25s ease;
+}
+
+
+.order-submit-button:hover {
+    background: #07543e;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(8, 127, 91, 0.2);
+}
+
+
+/* Keyboard Focus */
+
+.package-radio:focus-visible + .package-option {
+    outline: 3px solid #087f5b;
+    outline-offset: 3px;
+}
+
+</style>
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const packageCards = document.querySelectorAll('.package-card');
+
+    function updateSelection() {
+
+        packageCards.forEach(function (card) {
+
+            const radio = card.querySelector('.package-radio');
+
+            if (radio.checked) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+
+        });
+
+    }
+
+
+    packageCards.forEach(function (card) {
+
+        const radio = card.querySelector('.package-radio');
+
+        radio.addEventListener('change', updateSelection);
+
+    });
+
+
+    updateSelection();
+
+});
+
+</script>
+
+{% endblock %}

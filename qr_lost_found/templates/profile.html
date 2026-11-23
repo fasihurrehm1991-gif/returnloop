@@ -1,0 +1,534 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile | ReturnLoop{% endblock %}
+
+{% block content %}
+
+<style>
+    .profile-wrapper {
+        max-width: 1050px;
+        margin: auto;
+        padding: 55px 20px 75px;
+    }
+
+    /* HEADER */
+
+    .profile-header {
+        background: linear-gradient(120deg, #d5ebdc, #edf6ef);
+        border: 1px solid #c8e0d0;
+        border-radius: 22px;
+        padding: 38px 42px;
+        margin-bottom: 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .profile-eyebrow {
+        display: inline-block;
+        background: #087f5b;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 30px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+    }
+
+    .profile-header h1 {
+        color: #10372b;
+        font-size: 38px;
+        font-weight: 800;
+        margin-bottom: 9px;
+    }
+
+    .profile-header p {
+        color: #637b6e;
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.7;
+    }
+
+    .profile-header-icon {
+        width: 82px;
+        height: 82px;
+        background: #087f5b;
+        color: white;
+        border-radius: 23px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 38px;
+        flex-shrink: 0;
+    }
+
+    /* MAIN CARD */
+
+    .profile-card {
+        background: white;
+        border: 1px solid #e1ebe4;
+        border-radius: 21px;
+        padding: 35px;
+        box-shadow: 0 8px 28px rgba(16, 55, 43, 0.055);
+    }
+
+    /* USER INFORMATION */
+
+    .profile-user {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+
+    .profile-avatar {
+        width: 68px;
+        height: 68px;
+        background: #e1f1e6;
+        color: #087f5b;
+        border: 1px solid #cce5d4;
+        border-radius: 19px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 29px;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .profile-user-info h2 {
+        color: #10372b;
+        font-size: 21px;
+        font-weight: 800;
+        margin: 0 0 5px;
+    }
+
+    .profile-user-info p {
+        color: #829188;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .profile-status {
+        margin-left: auto;
+        background: #e1f3e6;
+        color: #087f5b;
+        padding: 9px 14px;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .profile-divider {
+        height: 1px;
+        background: #e9f0eb;
+        margin: 30px 0;
+    }
+
+    /* FORM HEADING */
+
+    .profile-form-heading {
+        margin-bottom: 27px;
+    }
+
+    .profile-form-heading h3 {
+        color: #10372b;
+        font-size: 21px;
+        font-weight: 800;
+        margin-bottom: 7px;
+    }
+
+    .profile-form-heading p {
+        color: #829188;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    /* FORM */
+
+    .profile-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    .profile-field {
+        min-width: 0;
+    }
+
+    .profile-field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .profile-field label {
+        display: block;
+        color: #315b46;
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 9px;
+    }
+
+    .profile-field input {
+        width: 100%;
+        padding: 14px 15px;
+        background: #f8fbf9;
+        border: 1px solid #dce8df;
+        border-radius: 11px;
+        color: #10372b;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .profile-field input:focus {
+        outline: none;
+        background: white;
+        border-color: #087f5b;
+        box-shadow: 0 0 0 4px rgba(8, 127, 91, 0.09);
+    }
+
+    .profile-field small {
+        display: block;
+        color: #91a096;
+        font-size: 11px;
+        margin-top: 8px;
+    }
+
+    .profile-field .text-danger {
+        font-size: 12px;
+    }
+
+    /* BUTTONS */
+
+    .profile-actions {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        flex-wrap: wrap;
+        margin-top: 32px;
+        padding-top: 25px;
+        border-top: 1px solid #e9f0eb;
+    }
+
+    .save-profile-button,
+    .back-profile-button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 13px 22px;
+        border-radius: 11px;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    .save-profile-button {
+        background: #087f5b;
+        color: white;
+        border: 1px solid #087f5b;
+    }
+
+    .save-profile-button:hover {
+        background: #07543e;
+        border-color: #07543e;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(8, 127, 91, 0.17);
+    }
+
+    .back-profile-button {
+        background: #edf5ef;
+        color: #315b46;
+        border: 1px solid #d5e6da;
+    }
+
+    .back-profile-button:hover {
+        background: #dceee2;
+        color: #087f5b;
+    }
+
+    /* SECURITY SECTION */
+
+    .profile-security {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 23px;
+        padding: 19px 22px;
+        background: #edf6ef;
+        border: 1px solid #d5e9db;
+        border-radius: 15px;
+    }
+
+    .security-icon {
+        width: 36px;
+        height: 36px;
+        background: #087f5b;
+        color: white;
+        border-radius: 11px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 17px;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .profile-security h4 {
+        color: #244b3d;
+        font-size: 13px;
+        font-weight: 800;
+        margin: 0 0 4px;
+    }
+
+    .profile-security p {
+        color: #71877a;
+        font-size: 12px;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 650px) {
+        .profile-wrapper {
+            padding: 35px 15px 55px;
+        }
+
+        .profile-header {
+            padding: 27px 23px;
+        }
+
+        .profile-header h1 {
+            font-size: 30px;
+        }
+
+        .profile-header-icon {
+            display: none;
+        }
+
+        .profile-card {
+            padding: 25px 20px;
+        }
+
+        .profile-user {
+            gap: 13px;
+        }
+
+        .profile-avatar {
+            width: 58px;
+            height: 58px;
+            font-size: 25px;
+        }
+
+        .profile-user-info h2 {
+            font-size: 18px;
+        }
+
+        .profile-status {
+            margin-left: 0;
+        }
+
+        .profile-form-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .profile-field.full-width {
+            grid-column: auto;
+        }
+
+        .profile-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .save-profile-button,
+        .back-profile-button {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="profile-wrapper">
+
+    <!-- PROFILE HEADER -->
+
+    <section class="profile-header">
+
+        <div>
+            <span class="profile-eyebrow">
+                ACCOUNT SETTINGS
+            </span>
+
+            <h1>My Profile</h1>
+
+            <p>
+                Manage your personal information and keep your
+                ReturnLoop account up to date.
+            </p>
+        </div>
+
+        <div class="profile-header-icon">
+            ♙
+        </div>
+
+    </section>
+
+
+    <!-- PROFILE CARD -->
+
+    <section class="profile-card">
+
+        <div class="profile-user">
+
+            <div class="profile-avatar">
+                {{ user.username|first|upper }}
+            </div>
+
+            <div class="profile-user-info">
+
+                <h2>
+                    {{ user.first_name|default:user.username }}
+                </h2>
+
+                <p>ReturnLoop Member</p>
+
+            </div>
+
+            <span class="profile-status">
+                ● Active Account
+            </span>
+
+        </div>
+
+
+        <div class="profile-divider"></div>
+
+
+        <!-- PROFILE FORM HEADING -->
+
+        <div class="profile-form-heading">
+
+            <h3>Personal Information</h3>
+
+            <p>
+                Update the information associated with your account.
+            </p>
+
+        </div>
+
+
+        <!-- PROFILE FORM -->
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="profile-form-grid">
+
+                <div class="profile-field">
+
+                    <label for="{{ form.full_name.id_for_label }}">
+                        Full Name
+                    </label>
+
+                    {{ form.full_name }}
+
+                    {% for error in form.full_name.errors %}
+                        <div class="text-danger mt-2">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="profile-field">
+
+                    <label for="{{ form.email.id_for_label }}">
+                        Email Address
+                    </label>
+
+                    {{ form.email }}
+
+                    {% for error in form.email.errors %}
+                        <div class="text-danger mt-2">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="profile-field full-width">
+
+                    <label for="{{ form.phone.id_for_label }}">
+                        Phone Number
+                    </label>
+
+                    {{ form.phone }}
+
+                    {% for error in form.phone.errors %}
+                        <div class="text-danger mt-2">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                    <small>
+                        Your phone number is kept private.
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTION BUTTONS -->
+
+            <div class="profile-actions">
+
+                <button type="submit" class="save-profile-button">
+                    Save Changes →
+                </button>
+
+                <a href="{% url 'dashboard' %}"
+                   class="back-profile-button">
+                    ← Back to Dashboard
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- SECURITY INFORMATION -->
+
+    <div class="profile-security">
+
+        <div class="security-icon">
+            ✓
+        </div>
+
+        <div>
+            <h4>Your Information Is Protected</h4>
+
+            <p>
+                ReturnLoop keeps your personal contact information private.
+                Your phone number and email address are not publicly
+                displayed when someone scans your QR code.
+            </p>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

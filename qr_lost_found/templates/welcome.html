@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome | ReturnLoop{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="row justify-content-center align-items-center"
+         style="min-height: 75vh;">
+
+        <div class="col-lg-8 col-md-10">
+
+            <div class="text-center bg-white shadow-lg p-4 p-md-5"
+                 style="border-radius: 28px;">
+
+                <div class="mb-4">
+
+                    <img src="{% static 'images/returnloop-logo.png.png' %}"
+                         alt="ReturnLoop Logo"
+                         style="width: 260px;
+                                max-width: 85%;
+                                height: auto;">
+
+                </div>
+
+                <p class="text-uppercase fw-bold mb-3"
+                   style="color: #087f5b;
+                          letter-spacing: 3px;
+                          font-size: 13px;">
+
+                    Welcome to ReturnLoop
+
+                </p>
+
+                <h1 class="fw-bold mb-3"
+                    style="color: #10372b;
+                           font-size: clamp(30px, 5vw, 46px);">
+
+                    Never Lose What Matters.
+
+                </h1>
+
+                <p class="mx-auto mb-4"
+                   style="color: #637b6e;
+                          max-width: 540px;
+                          font-size: 16px;
+                          line-height: 1.8;">
+
+                    A smarter way to protect your belongings.
+                    Register with ReturnLoop, receive your personal QR
+                    sticker and get notified when someone finds your item.
+
+                </p>
+
+                <div class="d-grid gap-3 col-md-8 mx-auto">
+
+                    <a href="{% url 'register' %}"
+                       class="btn btn-lg py-3 fw-bold text-white"
+                       style="background: #087f5b;
+                              border-radius: 12px;
+                              border: none;">
+
+                        Create an Account
+
+                    </a>
+
+                    <a href="{% url 'login' %}"
+                       class="btn btn-lg py-3 fw-bold"
+                       style="background: #e5f0e8;
+                              color: #07543e;
+                              border-radius: 12px;
+                              border: 1px solid #cbded1;">
+
+                        Already Have an Account? Login
+
+                    </a>
+
+                </div>
+
+                <div class="mt-5 pt-3"
+                     style="border-top: 1px solid #e5eee8;">
+
+                    <p class="mb-1 fw-semibold"
+                       style="color: #244b3d;">
+
+                        Your Privacy Matters
+
+                    </p>
+
+                    <p class="small mb-0"
+                       style="color: #637b6e;">
+
+                        Your personal contact information remains private.
+                        Finders can notify you without seeing your details.
+
+                    </p>
+
+                </div>
+
+                <p class="small mt-4 mb-0"
+                   style="color: #91a69a;">
+
+                    SCAN IT. NOTIFY THE OWNER. RETURN IT.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

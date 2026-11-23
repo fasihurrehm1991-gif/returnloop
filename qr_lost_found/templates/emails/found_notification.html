@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReturnLoop Notification</title>
+</head>
+
+<body style="margin:0; padding:30px 10px; background-color:#f3f6f4; font-family:Arial, sans-serif;">
+
+    <div style="max-width:550px; margin:auto; background-color:#ffffff; border-radius:12px; overflow:hidden;">
+
+        <div style="background-color:#123c32; padding:25px; text-align:center;">
+
+            <img src="cid:returnloop_logo"
+                 alt="ReturnLoop Logo"
+                 style="width:90px; height:auto; display:block; margin:0 auto 12px;">
+
+            <h1 style="color:#ffffff; margin:0; font-size:28px;">
+                ReturnLoop
+            </h1>
+
+            <p style="color:#d6e9df; margin:8px 0 0;">
+                Helping belongings find their way home.
+            </p>
+
+        </div>
+
+        <div style="padding:30px;">
+
+            <h2 style="color:#123c32; margin-top:0;">
+                Someone Found Your Belonging!
+            </h2>
+
+            <p style="color:#444444; line-height:1.6;">
+                Hello {{ owner_name }},
+            </p>
+
+            <p style="color:#444444; line-height:1.6;">
+                Someone has scanned your ReturnLoop QR sticker
+                and submitted a found-item notification.
+            </p>
+
+            <div style="background-color:#f3f8f5; padding:20px; border-radius:8px; margin:25px 0;">
+
+                <h3 style="color:#123c32; margin-top:0;">
+                    Finder's Information
+                </h3>
+
+                <p style="color:#444444;">
+                    <strong>Message:</strong><br>
+                    {{ message }}
+                </p>
+
+                <p style="color:#444444;">
+                    <strong>Location:</strong><br>
+                    {{ location }}
+                </p>
+
+                <p style="color:#444444;">
+                    <strong>Date:</strong><br>
+                    {{ date }}
+                </p>
+
+            </div>
+
+            <p style="color:#444444; line-height:1.6;">
+                Log in to your ReturnLoop account to view your notification.
+            </p>
+
+            <div style="text-align:center; margin:30px 0;">
+
+                <a href="{{ dashboard_url }}"
+                   style="background-color:#15966b; color:#ffffff; text-decoration:none; padding:14px 28px; border-radius:6px; display:inline-block; font-weight:bold;">
+                    Open My Dashboard
+                </a>
+
+            </div>
+
+            <p style="color:#666666; font-size:13px; line-height:1.6;">
+                Your privacy matters. The finder cannot see your personal
+                contact information through ReturnLoop.
+            </p>
+
+        </div>
+
+        <div style="background-color:#f3f6f4; padding:18px; text-align:center;">
+
+            <p style="color:#777777; font-size:12px; margin:0;">
+                © ReturnLoop. All rights reserved.
+            </p>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

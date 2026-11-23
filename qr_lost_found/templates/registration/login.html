@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block title %}Login | ReturnLoop{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .login-section {
+        min-height: 75vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 55px 20px;
+    }
+
+    .login-wrapper {
+        width: 100%;
+        max-width: 1050px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: #ffffff;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 15px 45px rgba(16, 55, 43, 0.12);
+    }
+
+    .login-left {
+        padding: 65px 50px;
+        background: linear-gradient(145deg, #087f5b, #07543e);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .login-badge {
+        display: inline-block;
+        width: fit-content;
+        padding: 8px 15px;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.15);
+        font-size: 13px;
+        margin-bottom: 25px;
+    }
+
+    .login-left h1 {
+        font-size: 38px;
+        font-weight: 750;
+        line-height: 1.2;
+        margin-bottom: 20px;
+    }
+
+    .login-left p {
+        color: #e0f2e8;
+        font-size: 16px;
+        line-height: 1.8;
+        margin-bottom: 30px;
+    }
+
+    .login-benefit {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 17px;
+        color: #ffffff;
+        font-size: 14px;
+    }
+
+    .benefit-icon {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.16);
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .login-right {
+        padding: 65px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .login-heading {
+        margin-bottom: 30px;
+    }
+
+    .login-heading .eyebrow {
+        color: #087f5b;
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .login-heading h2 {
+        color: #10372b;
+        font-size: 32px;
+        font-weight: 750;
+        margin-bottom: 10px;
+    }
+
+    .login-heading p {
+        color: #637b6e;
+        font-size: 14px;
+    }
+
+    .login-form p {
+        margin-bottom: 20px;
+    }
+
+    .login-form label {
+        display: block;
+        color: #244b3d;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .login-form input {
+        width: 100%;
+        padding: 13px 15px;
+        border: 1px solid #cbded1;
+        border-radius: 10px;
+        background: #f8fbf9;
+        color: #10372b;
+        font-size: 14px;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    .login-form input:focus {
+        border-color: #087f5b;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(8, 127, 91, 0.10);
+    }
+
+    .login-form ul {
+        color: #dc3545;
+        font-size: 13px;
+        padding-left: 20px;
+        margin-top: 7px;
+    }
+
+    .login-error {
+        padding: 12px 15px;
+        background: #fff0f0;
+        color: #b42318;
+        border: 1px solid #f5c2c2;
+        border-radius: 10px;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .login-button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        background: #087f5b;
+        color: white;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.25s;
+        margin-top: 8px;
+    }
+
+    .login-button:hover {
+        background: #07543e;
+        transform: translateY(-2px);
+        box-shadow: 0 7px 18px rgba(8, 127, 91, 0.2);
+    }
+
+    .forgot-password {
+        display: block;
+        text-align: right;
+        margin-top: 18px;
+        color: #087f5b;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .forgot-password:hover {
+        color: #07543e;
+        text-decoration: underline;
+    }
+
+    .login-security {
+        text-align: center;
+        color: #82958a;
+        font-size: 12px;
+        margin-top: 25px;
+    }
+
+    @media (max-width: 768px) {
+
+        .login-wrapper {
+            grid-template-columns: 1fr;
+        }
+
+        .login-left {
+            padding: 40px 30px;
+        }
+
+        .login-left h1 {
+            font-size: 30px;
+        }
+
+        .login-right {
+            padding: 40px 30px;
+        }
+
+    }
+
+</style>
+
+
+<section class="login-section">
+
+    <div class="login-wrapper">
+
+        <!-- Left Side -->
+
+        <div class="login-left">
+
+            <span class="login-badge">
+                Welcome to ReturnLoop
+            </span>
+
+            <h1>
+                Your belongings deserve a way back.
+            </h1>
+
+            <p>
+                Sign in to manage your account, receive found-item
+                notifications, and stay connected with your belongings.
+            </p>
+
+            <div class="login-benefit">
+                <span class="benefit-icon">✓</span>
+                <span>One QR code for your registered account</span>
+            </div>
+
+            <div class="login-benefit">
+                <span class="benefit-icon">✓</span>
+                <span>Private and secure owner information</span>
+            </div>
+
+            <div class="login-benefit">
+                <span class="benefit-icon">✓</span>
+                <span>Instant found-item notifications</span>
+            </div>
+
+        </div>
+
+
+        <!-- Right Side -->
+
+        <div class="login-right">
+
+            <div class="login-heading">
+
+                <p class="eyebrow">Your Account</p>
+
+                <h2>Welcome Back</h2>
+
+                <p>
+                    Enter your account details to continue.
+                </p>
+
+            </div>
+
+
+            <form method="post" class="login-form">
+
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+
+                    <div class="login-error">
+                        {{ form.non_field_errors }}
+                    </div>
+
+                {% endif %}
+
+                {% for field in form %}
+
+                    <p>
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.errors %}
+                            {{ field.errors }}
+                        {% endif %}
+
+                    </p>
+
+                {% endfor %}
+
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+
+                <button type="submit" class="login-button">
+                    Sign In →
+                </button>
+
+            </form>
+
+
+            <a href="{% url 'password_reset' %}" class="forgot-password">
+                Forgot Password?
+            </a>
+
+
+            <div class="login-security">
+                🔒 Your account information is protected.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

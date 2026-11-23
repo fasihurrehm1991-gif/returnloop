@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account | ReturnLoop{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-7 col-md-9">
+
+            <div class="card border-0 shadow-lg"
+                 style="border-radius: 22px; overflow: hidden;">
+
+                <div class="p-4 p-md-5 text-white"
+                     style="background: linear-gradient(135deg, #07543e, #087f5b);">
+
+                    <p class="text-uppercase mb-2"
+                       style="letter-spacing: 2px; font-size: 12px;">
+                        Join ReturnLoop
+                    </p>
+
+                    <h1 class="fw-bold mb-2">
+                        Create Your Account
+                    </h1>
+
+                    <p class="mb-0 opacity-75">
+                        Register to protect your belongings and receive
+                        notifications when someone finds them.
+                    </p>
+
+                </div>
+
+                <div class="p-4 p-md-5">
+
+                    <form method="post">
+
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <h5 class="fw-bold mb-3"
+                            style="color: #10372b;">
+                            Personal Information
+                        </h5>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label fw-semibold">
+                                    First Name
+                                </label>
+
+                                {{ form.first_name }}
+
+                                {% for error in form.first_name.errors %}
+                                    <div class="text-danger small">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label fw-semibold">
+                                    Last Name
+                                </label>
+
+                                {{ form.last_name }}
+
+                                {% for error in form.last_name.errors %}
+                                    <div class="text-danger small">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
+                                Username
+                            </label>
+
+                            {{ form.username }}
+
+                            {% for error in form.username.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
+                                Email Address
+                            </label>
+
+                            {{ form.email }}
+
+                            <small class="text-muted">
+                                Lost-item notifications will be sent to this email.
+                            </small>
+
+                            {% for error in form.email.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                Phone Number
+                            </label>
+
+                            {{ form.phone }}
+
+                            <small class="text-muted">
+                                Your phone number is private and accessible
+                                only to authorized administrators.
+                            </small>
+
+                            {% for error in form.phone.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="fw-bold mb-3"
+                            style="color: #10372b;">
+                            Account Security
+                        </h5>
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
+                                Password
+                            </label>
+
+                            {{ form.password1 }}
+
+                            {% for error in form.password1.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                            {% if form.password1.help_text %}
+                                <div class="text-muted small mt-2">
+                                    {{ form.password1.help_text|safe }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                Confirm Password
+                            </label>
+
+                            {{ form.password2 }}
+
+                            {% for error in form.password2.errors %}
+                                <div class="text-danger small">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-success w-100 py-3 fw-bold"
+                                style="background: #087f5b;
+                                       border: none;
+                                       border-radius: 10px;">
+
+                            Create My Account
+
+                        </button>
+
+                    </form>
+
+                    <div class="text-center mt-4">
+
+                        <p class="mb-0 text-muted">
+                            Already have an account?
+
+                            <a href="{% url 'login' %}"
+                               class="fw-bold text-decoration-none"
+                               style="color: #087f5b;">
+                                Login here
+                            </a>
+
+                        </p>
+
+                    </div>
+
+                    <div class="text-center mt-4">
+
+                        <small class="text-muted">
+                            Your personal contact information is never
+                            displayed to people scanning your QR code.
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

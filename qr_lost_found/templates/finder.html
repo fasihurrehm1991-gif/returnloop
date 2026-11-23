@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}Found Something? | ReturnLoop{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .finder-section {
+        min-height: 78vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 20px;
+    }
+
+    .finder-card {
+        width: 100%;
+        max-width: 620px;
+        background: #ffffff;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 15px 45px rgba(16, 55, 43, 0.10);
+        border: 1px solid #dce9df;
+    }
+
+    .finder-header {
+        background: linear-gradient(135deg, #087f5b, #07543e);
+        color: white;
+        text-align: center;
+        padding: 38px 30px;
+    }
+
+    .finder-icon {
+        width: 65px;
+        height: 65px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 30px;
+    }
+
+    .finder-header h1 {
+        font-size: 29px;
+        font-weight: 750;
+        margin-bottom: 10px;
+    }
+
+    .finder-header p {
+        color: #e0f2e8;
+        font-size: 14px;
+        margin-bottom: 0;
+        line-height: 1.7;
+    }
+
+    .finder-body {
+        padding: 38px;
+    }
+
+    .finder-intro {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .finder-intro h2 {
+        color: #10372b;
+        font-size: 22px;
+        font-weight: 750;
+        margin-bottom: 9px;
+    }
+
+    .finder-intro p {
+        color: #637b6e;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .finder-form label {
+        display: block;
+        color: #244b3d;
+        font-size: 14px;
+        font-weight: 650;
+        margin-bottom: 9px;
+    }
+
+    .finder-form textarea,
+    .finder-form input {
+        width: 100%;
+        border: 1px solid #cbded1;
+        border-radius: 11px;
+        padding: 13px 15px;
+        background: #f8fbf9;
+        color: #10372b;
+        font-size: 14px;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    .finder-form textarea {
+        resize: vertical;
+        min-height: 125px;
+    }
+
+    .finder-form textarea:focus,
+    .finder-form input:focus {
+        border-color: #087f5b;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(8, 127, 91, 0.10);
+    }
+
+    .finder-field {
+        margin-bottom: 23px;
+    }
+
+    .finder-hint {
+        color: #82958a;
+        font-size: 12px;
+        margin-top: 7px;
+    }
+
+    .notify-button {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 11px;
+        background: #087f5b;
+        color: white;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.25s;
+    }
+
+    .notify-button:hover {
+        background: #07543e;
+        transform: translateY(-2px);
+        box-shadow: 0 7px 18px rgba(8, 127, 91, 0.2);
+    }
+
+    .finder-privacy {
+        margin-top: 24px;
+        padding: 14px;
+        background: #edf6ef;
+        border: 1px solid #d5e9da;
+        border-radius: 11px;
+        text-align: center;
+        color: #416b53;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 576px) {
+
+        .finder-body {
+            padding: 27px 22px;
+        }
+
+        .finder-header {
+            padding: 32px 22px;
+        }
+
+        .finder-header h1 {
+            font-size: 25px;
+        }
+
+    }
+
+</style>
+
+
+<section class="finder-section">
+
+    <div class="finder-card">
+
+        <div class="finder-header">
+
+            <div class="finder-icon">
+                ↩
+            </div>
+
+            <h1>Found Something?</h1>
+
+            <p>
+                You've taken the first step towards reuniting
+                someone with their belongings.
+            </p>
+
+        </div>
+
+
+        <div class="finder-body">
+
+            <div class="finder-intro">
+
+                <h2>Notify the Owner</h2>
+
+                <p>
+                    Tell the owner where you found their item.
+                    Your message will be sent directly to them.
+                </p>
+
+            </div>
+
+
+            <form method="POST" class="finder-form">
+
+                {% csrf_token %}
+
+                <div class="finder-field">
+
+                    <label for="message">
+                        Your Message
+                    </label>
+
+                    <textarea
+                        id="message"
+                        name="message"
+                        placeholder="Describe the item you found and any useful details..."
+                        maxlength="2000"
+                        required
+                    ></textarea>
+
+                    <div class="finder-hint">
+                        Please provide enough details to help the owner identify their item.
+                    </div>
+
+                </div>
+
+
+                <div class="finder-field">
+
+                    <label for="location">
+                        Where Did You Find It?
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="e.g. University library, cafeteria..."
+                        maxlength="255"
+                    >
+
+                    <div class="finder-hint">
+                        Providing a location helps the owner recover their belongings.
+                    </div>
+
+                </div>
+
+
+                <button type="submit" class="notify-button">
+                    Notify Owner →
+                </button>
+
+            </form>
+
+
+            <div class="finder-privacy">
+                🔒 <strong>Your privacy matters.</strong><br>
+                Your personal contact information is not shared with the owner.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,788 @@
+{% extends 'base.html' %}
+
+{% block title %}ReturnLoop | Bring Lost Belongings Home{% endblock %}
+
+{% block content %}
+
+<style>
+
+    /* GENERAL */
+
+    .home-page {
+        overflow: hidden;
+        color: #10372b;
+    }
+
+    .home-page * {
+        box-sizing: border-box;
+    }
+
+
+    /* HERO SECTION */
+
+    .home-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 105px 25px 115px;
+        text-align: center;
+        background: linear-gradient(135deg, #edf7ef, #dceee2);
+    }
+
+    .home-hero::before,
+    .home-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(8, 127, 91, 0.07);
+        pointer-events: none;
+    }
+
+    .home-hero::before {
+        width: 420px;
+        height: 420px;
+        top: -230px;
+        left: -130px;
+    }
+
+    .home-hero::after {
+        width: 350px;
+        height: 350px;
+        bottom: -210px;
+        right: -100px;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 850px;
+        margin: auto;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 20px;
+        background: #d7eee0;
+        color: #087f5b;
+        border: 1px solid #c6e5d1;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 28px;
+    }
+
+    .hero-badge span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #087f5b;
+    }
+
+    .hero-content h1 {
+        color: #10372b;
+        font-size: clamp(43px, 6vw, 72px);
+        font-weight: 850;
+        line-height: 1.12;
+        letter-spacing: -2.5px;
+        margin-bottom: 25px;
+    }
+
+    .hero-content h1 span {
+        color: #087f5b;
+    }
+
+    .hero-description {
+        max-width: 660px;
+        margin: 0 auto 35px;
+        color: #637b6e;
+        font-size: 17px;
+        line-height: 1.9;
+    }
+
+    .hero-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .hero-primary,
+    .hero-secondary {
+        display: inline-block;
+        padding: 15px 30px;
+        border-radius: 11px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 750;
+        transition: 0.25s ease;
+    }
+
+    .hero-primary {
+        background: #087f5b;
+        color: white;
+        box-shadow: 0 8px 20px rgba(8, 127, 91, 0.18);
+    }
+
+    .hero-primary:hover {
+        background: #07543e;
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    .hero-secondary {
+        background: white;
+        color: #07543e;
+        border: 1px solid #cbded1;
+    }
+
+    .hero-secondary:hover {
+        background: #f1f8f3;
+        color: #07543e;
+        transform: translateY(-3px);
+    }
+
+
+    /* TRUST STRIP */
+
+    .trust-strip {
+        max-width: 950px;
+        margin: -30px auto 0;
+        padding: 22px 25px;
+        position: relative;
+        z-index: 3;
+        background: white;
+        border: 1px solid #e0ebe2;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(16, 55, 43, 0.07);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        text-align: center;
+    }
+
+    .trust-item {
+        color: #315c49;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.6;
+    }
+
+    .trust-item span {
+        display: block;
+        color: #087f5b;
+        font-size: 22px;
+        margin-bottom: 5px;
+    }
+
+
+    /* INTRODUCTION */
+
+    .home-intro {
+        max-width: 850px;
+        margin: auto;
+        padding: 100px 25px 65px;
+        text-align: center;
+    }
+
+    .section-eyebrow {
+        color: #087f5b;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+    }
+
+    .home-intro h2 {
+        color: #10372b;
+        font-size: 36px;
+        font-weight: 850;
+        line-height: 1.3;
+        margin-bottom: 18px;
+    }
+
+    .home-intro p {
+        color: #637b6e;
+        font-size: 15px;
+        line-height: 1.9;
+    }
+
+
+    /* HOW IT WORKS */
+
+    .home-steps-section {
+        padding: 85px 25px 100px;
+        background: #f1f7f2;
+    }
+
+    .steps-heading {
+        text-align: center;
+        max-width: 650px;
+        margin: 0 auto 50px;
+    }
+
+    .steps-heading h2 {
+        color: #10372b;
+        font-size: 36px;
+        font-weight: 850;
+        margin-bottom: 15px;
+    }
+
+    .steps-heading p {
+        color: #637b6e;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .home-steps-grid {
+        max-width: 1120px;
+        margin: auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+    }
+
+    .home-step-card {
+        position: relative;
+        background: white;
+        padding: 38px 30px;
+        border-radius: 18px;
+        border: 1px solid #dce9df;
+        box-shadow: 0 8px 25px rgba(16, 55, 43, 0.045);
+        transition: 0.25s ease;
+    }
+
+    .home-step-card:hover {
+        transform: translateY(-7px);
+        box-shadow: 0 16px 35px rgba(16, 55, 43, 0.09);
+    }
+
+    .step-number {
+        width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e1f3e7;
+        color: #087f5b;
+        border-radius: 15px;
+        font-size: 17px;
+        font-weight: 850;
+        margin-bottom: 25px;
+    }
+
+    .home-step-card h3 {
+        color: #10372b;
+        font-size: 21px;
+        font-weight: 800;
+        margin-bottom: 13px;
+    }
+
+    .home-step-card p {
+        color: #637b6e;
+        font-size: 14px;
+        line-height: 1.85;
+        margin-bottom: 0;
+    }
+
+
+    /* PRIVACY SECTION */
+
+    .privacy-section {
+        padding: 100px 25px;
+    }
+
+    .privacy-container {
+        max-width: 1050px;
+        margin: auto;
+        display: grid;
+        grid-template-columns: 1fr 0.9fr;
+        gap: 65px;
+        align-items: center;
+    }
+
+    .privacy-content h2 {
+        color: #10372b;
+        font-size: 36px;
+        font-weight: 850;
+        line-height: 1.3;
+        margin-bottom: 20px;
+    }
+
+    .privacy-content > p:not(.section-eyebrow) {
+        color: #637b6e;
+        font-size: 15px;
+        line-height: 1.9;
+    }
+
+    .privacy-points {
+        margin-top: 27px;
+    }
+
+    .privacy-point {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        margin-bottom: 19px;
+        color: #315c49;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .privacy-check {
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: #e1f3e7;
+        color: #087f5b;
+        border-radius: 50%;
+        font-weight: 850;
+    }
+
+    .privacy-visual {
+        background: linear-gradient(145deg, #087f5b, #07543e);
+        padding: 55px 40px;
+        border-radius: 24px;
+        color: white;
+        text-align: center;
+        box-shadow: 0 18px 40px rgba(8, 127, 91, 0.16);
+    }
+
+    .privacy-visual-icon {
+        width: 95px;
+        height: 95px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        background: rgba(255, 255, 255, 0.13);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        font-size: 43px;
+    }
+
+    .privacy-visual h3 {
+        font-size: 25px;
+        font-weight: 800;
+        margin-bottom: 15px;
+    }
+
+    .privacy-visual p {
+        color: #e0f2e8;
+        font-size: 14px;
+        line-height: 1.9;
+        margin-bottom: 0;
+    }
+
+
+    /* FINAL CTA */
+
+    .home-cta {
+        padding: 85px 25px;
+        background: linear-gradient(135deg, #087f5b, #07543e);
+        text-align: center;
+    }
+
+    .home-cta h2 {
+        color: white;
+        font-size: 38px;
+        font-weight: 850;
+        margin-bottom: 17px;
+    }
+
+    .home-cta p {
+        max-width: 600px;
+        margin: 0 auto 30px;
+        color: #e0f2e8;
+        font-size: 15px;
+        line-height: 1.9;
+    }
+
+    .cta-button {
+        display: inline-block;
+        padding: 15px 33px;
+        background: white;
+        color: #07543e;
+        border-radius: 11px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 800;
+        transition: 0.25s ease;
+    }
+
+    .cta-button:hover {
+        background: #e1f3e7;
+        color: #07543e;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+
+    /* RESPONSIVE DESIGN */
+
+    @media (max-width: 850px) {
+
+        .home-steps-grid {
+            grid-template-columns: 1fr;
+            max-width: 550px;
+        }
+
+        .privacy-container {
+            grid-template-columns: 1fr;
+            gap: 40px;
+            max-width: 650px;
+        }
+
+    }
+
+    @media (max-width: 576px) {
+
+        .home-hero {
+            padding: 75px 20px 85px;
+        }
+
+        .hero-content h1 {
+            font-size: 43px;
+            letter-spacing: -1.5px;
+        }
+
+        .hero-description {
+            font-size: 15px;
+        }
+
+        .hero-actions {
+            flex-direction: column;
+        }
+
+        .hero-primary,
+        .hero-secondary {
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .trust-strip {
+            margin: -20px 15px 0;
+            padding: 18px 10px;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .trust-item span {
+            display: inline;
+            margin-right: 7px;
+        }
+
+        .home-intro {
+            padding: 75px 22px 50px;
+        }
+
+        .home-intro h2,
+        .steps-heading h2,
+        .privacy-content h2 {
+            font-size: 29px;
+        }
+
+        .home-steps-section {
+            padding: 70px 20px;
+        }
+
+        .home-step-card {
+            padding: 30px 25px;
+        }
+
+        .privacy-section {
+            padding: 75px 22px;
+        }
+
+        .privacy-visual {
+            padding: 40px 25px;
+        }
+
+        .home-cta {
+            padding: 70px 22px;
+        }
+
+        .home-cta h2 {
+            font-size: 29px;
+        }
+
+    }
+
+</style>
+
+
+<div class="home-page">
+
+    <!-- HERO SECTION -->
+
+    <section class="home-hero">
+
+        <div class="hero-content">
+
+            <span class="hero-badge">
+                <span></span>
+                A SMARTER WAY TO RECONNECT
+            </span>
+
+            <h1>
+                Lost something?<br>
+                <span>Let's bring it home.</span>
+            </h1>
+
+            <p class="hero-description">
+                ReturnLoop makes returning lost belongings easier.
+                With one personal QR sticker, anyone who finds your
+                belongings can privately notify you.
+            </p>
+
+            <div class="hero-actions">
+
+                {% if user.is_authenticated %}
+
+                    <a href="{% url 'dashboard' %}" class="hero-primary">
+                        Go to Dashboard →
+                    </a>
+
+                {% else %}
+
+                    <a href="{% url 'login' %}" class="hero-primary">
+                        Get Started →
+                    </a>
+
+                {% endif %}
+
+                <a href="#how-it-works" class="hero-secondary">
+                    Discover How It Works
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- TRUST STRIP -->
+
+    <div class="trust-strip">
+
+        <div class="trust-item">
+            <span>✓</span>
+            Simple QR Scanning
+        </div>
+
+        <div class="trust-item">
+            <span>✓</span>
+            Private Notifications
+        </div>
+
+        <div class="trust-item">
+            <span>✓</span>
+            Easy Reconnection
+        </div>
+
+    </div>
+
+
+    <!-- INTRODUCTION -->
+
+    <section class="home-intro">
+
+        <p class="section-eyebrow">
+            INTRODUCING RETURNLOOP
+        </p>
+
+        <h2>
+            A small sticker. A big difference.
+        </h2>
+
+        <p>
+            Losing something important can be stressful.
+            ReturnLoop connects the person who finds your belongings
+            with you through a simple QR code system, making the
+            recovery process easier and more convenient.
+        </p>
+
+    </section>
+
+
+    <!-- HOW IT WORKS -->
+
+    <section class="home-steps-section" id="how-it-works">
+
+        <div class="steps-heading">
+
+            <p class="section-eyebrow">
+                SIMPLE PROCESS
+            </p>
+
+            <h2>
+                How ReturnLoop Works
+            </h2>
+
+            <p>
+                Getting your belongings back doesn't have to be complicated.
+                Just follow three simple steps.
+            </p>
+
+        </div>
+
+
+        <div class="home-steps-grid">
+
+            <article class="home-step-card">
+
+                <div class="step-number">
+                    01
+                </div>
+
+                <h3>Register</h3>
+
+                <p>
+                    Create your ReturnLoop account and order your
+                    personal physical QR sticker.
+                </p>
+
+            </article>
+
+
+            <article class="home-step-card">
+
+                <div class="step-number">
+                    02
+                </div>
+
+                <h3>Attach</h3>
+
+                <p>
+                    Place your personal QR sticker on your belongings
+                    so they can be identified if lost.
+                </p>
+
+            </article>
+
+
+            <article class="home-step-card">
+
+                <div class="step-number">
+                    03
+                </div>
+
+                <h3>Reconnect</h3>
+
+                <p>
+                    Someone who finds your belongings scans the QR code
+                    and submits a notification to you.
+                </p>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- PRIVACY SECTION -->
+
+    <section class="privacy-section">
+
+        <div class="privacy-container">
+
+            <div class="privacy-content">
+
+                <p class="section-eyebrow">
+                    YOUR PRIVACY MATTERS
+                </p>
+
+                <h2>
+                    Reconnect without revealing your personal details.
+                </h2>
+
+                <p>
+                    Your privacy is an important part of ReturnLoop.
+                    Finders can send a notification without needing
+                    access to your personal contact information.
+                </p>
+
+                <div class="privacy-points">
+
+                    <div class="privacy-point">
+                        <span class="privacy-check">✓</span>
+                        <span>Your phone number is not displayed to finders.</span>
+                    </div>
+
+                    <div class="privacy-point">
+                        <span class="privacy-check">✓</span>
+                        <span>Finders can contact you through the QR notification form.</span>
+                    </div>
+
+                    <div class="privacy-point">
+                        <span class="privacy-check">✓</span>
+                        <span>Receive notifications through your ReturnLoop account.</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="privacy-visual">
+
+                <div class="privacy-visual-icon">
+                    🔒
+                </div>
+
+                <h3>
+                    Privacy First
+                </h3>
+
+                <p>
+                    A simple and private way to help lost belongings
+                    find their way back to their owners.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FINAL CTA -->
+
+    <section class="home-cta">
+
+        <h2>
+            Ready to protect your belongings?
+        </h2>
+
+        <p>
+            Join ReturnLoop and make it easier for someone
+            to return your lost belongings.
+        </p>
+
+        {% if user.is_authenticated %}
+
+            <a href="{% url 'dashboard' %}" class="cta-button">
+                Visit Your Dashboard →
+            </a>
+
+        {% else %}
+
+            <a href="{% url 'login' %}" class="cta-button">
+                Get Started Today →
+            </a>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}
