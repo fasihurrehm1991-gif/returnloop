@@ -2,7 +2,8 @@ services:
   - type: web
     name: returnloop
     runtime: python
-    buildCommand: "./build.sh"
+    rootDir: qr_lost_found
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate"
     startCommand: "gunicorn config.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
