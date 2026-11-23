@@ -22,6 +22,9 @@ ALLOWED_HOSTS = [
     ).split(',')
 ]
 
+if os.getenv('VERCEL') == '1':
+    ALLOWED_HOSTS.append('.vercel.app')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -97,10 +100,16 @@ elif os.getenv('DB_ENGINE', 'sqlite').lower() == 'postgres':
 
 else:
 
+    database_name = (
+        Path('/tmp/lost_found.sqlite3')
+        if os.getenv('VERCEL') == '1'
+        else BASE_DIR / 'db.sqlite3'
+    )
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': database_name,
         }
     }
 
