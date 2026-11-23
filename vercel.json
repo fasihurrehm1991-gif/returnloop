@@ -2,11 +2,18 @@
   "buildCommand": "cd qr_lost_found && python manage.py collectstatic --no-input",
   "builds": [
     {
+      "src": "qr_lost_found/static/**",
+      "use": "@vercel/static"
+    },
+    {
       "src": "qr_lost_found/api/index.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
+    {
+      "handle": "filesystem"
+    },
     {
       "src": "/static/(.*)",
       "dest": "/qr_lost_found/static/$1"
