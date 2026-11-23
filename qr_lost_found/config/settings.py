@@ -149,7 +149,7 @@ STORAGES = {
     'staticfiles': {
         'BACKEND': (
             'django.contrib.staticfiles.storage.StaticFilesStorage'
-            if DEBUG
+            if DEBUG or os.getenv('VERCEL') == '1'
             else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
         ),
     },
