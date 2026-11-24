@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core import mail
 from django.test import TestCase, override_settings
@@ -203,6 +204,24 @@ class QRFlowTests(TestCase):
             password='Strong-Test-Password-123!',
         )
         self.assertTrue(login)
+
+    def test_password_reset_done_page_reports_email_delivery_status(self):
+        response = self.client.get(reverse('password_reset_done'))
+        configured = response.context['email_delivery_configured']
+
+        self.assertEqual(configured, settings.EMAIL_DELIVERY_CONFIGURED)
+        if configured:
+            self.assertContains(response, "we've sent instructions")
+            self.assertNotContains(
+                response,
+                'Password reset email delivery is not configured yet.',
+            )
+        else:
+            self.assertContains(
+                response,
+                'Password reset email delivery is not configured yet.',
+            )
+            self.assertNotContains(response, "we've sent instructions")
 
     @override_settings(
         EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
