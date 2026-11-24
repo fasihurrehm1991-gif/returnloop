@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Sticker Packages & Pricing | ReturnLoop{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <div class="text-center mx-auto mb-4" style="max-width:720px;">
+        <span class="badge rounded-pill px-3 py-2 mb-3" style="background:#d8eee0;color:#087f5b;">PRICING</span>
+        <h1 class="fw-bold" style="color:#10372b;">Choose a sticker package</h1>
+        <p style="color:#637b6e;">
+            Package prices are not set yet. Place an order request and an administrator
+            will confirm the amount before any manual payment is recorded.
+        </p>
+    </div>
+
+    <div class="row g-3 justify-content-center">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4 text-center">
+                <h2 class="h4">Single Sticker</h2>
+                <p class="display-6 fw-bold">Price soon</p>
+                <p>One ReturnLoop sticker linked to your account's unique QR code.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4 text-center">
+                <h2 class="h4">Pack of 3</h2>
+                <p class="display-6 fw-bold">Price soon</p>
+                <p>Three physical stickers carrying your account's unique QR code.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4 text-center">
+                <h2 class="h4">Pack of 5</h2>
+                <p class="display-6 fw-bold">Price soon</p>
+                <p>Five physical stickers carrying your account's unique QR code.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-info mt-4 mx-auto" style="max-width:920px;">
+        <strong>Payments:</strong> online payment is not connected. Orders are requests;
+        the administrator confirms the price and manually records payment.
+        <br>
+        <strong>SMS:</strong> SMS alerts and paid SMS credits are not available yet.
+        The integration will be planned after an SMS provider and package prices are selected.
+        Email alerts are used when email delivery is configured.
+    </div>
+
+    <div class="text-center mt-4">
+        <a class="btn btn-success px-4 py-2" href="{% url 'place_order' %}">Request a Sticker</a>
+        <a class="btn btn-outline-success px-4 py-2 ms-2" href="{% url 'contact' %}">Ask a Question</a>
+    </div>
+</section>
+{% endblock %}

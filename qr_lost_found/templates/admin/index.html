@@ -1,0 +1,51 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+    {% if returnloop_admin_stats %}
+        <section style="margin: 0 0 24px;">
+            <h2>ReturnLoop overview</h2>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;">
+                <a href="{% url 'admin:auth_user_changelist' %}" style="padding:16px;background:#edf6ef;border-radius:8px;text-decoration:none;">
+                    <strong>Active accounts</strong><br>
+                    {{ returnloop_admin_stats.active_users }}
+                </a>
+                <a href="{% url 'admin:core_stickerorder_changelist' %}" style="padding:16px;background:#edf6ef;border-radius:8px;text-decoration:none;">
+                    <strong>Orders</strong><br>
+                    {{ returnloop_admin_stats.total_orders }} total · {{ returnloop_admin_stats.pending_orders }} pending
+                </a>
+                <a href="{% url 'admin:core_qrcode_changelist' %}" style="padding:16px;background:#edf6ef;border-radius:8px;text-decoration:none;">
+                    <strong>Active QR codes</strong><br>
+                    {{ returnloop_admin_stats.active_qr_codes }}
+                </a>
+                <a href="{% url 'admin:core_findernotification_changelist' %}" style="padding:16px;background:#edf6ef;border-radius:8px;text-decoration:none;">
+                    <strong>Unread finder messages</strong><br>
+                    {{ returnloop_admin_stats.unread_notifications }}
+                </a>
+                <div style="padding:16px;background:#edf6ef;border-radius:8px;">
+                    <strong>Recorded paid sales</strong><br>
+                    {% if returnloop_admin_stats.recorded_sales %}
+                        PKR {{ returnloop_admin_stats.recorded_sales|floatformat:2 }}
+                    {% else %}
+                        Not recorded
+                    {% endif %}
+                    {% if returnloop_admin_stats.paid_orders_without_amount %}
+                        <br><small>{{ returnloop_admin_stats.paid_orders_without_amount }} paid order(s) have no recorded amount.</small>
+                    {% endif %}
+                </div>
+                <a href="{% url 'admin:core_supportmessage_changelist' %}" style="padding:16px;background:#edf6ef;border-radius:8px;text-decoration:none;">
+                    <strong>Open support messages</strong><br>
+                    {{ returnloop_admin_stats.unresolved_support }}
+                </a>
+                <div style="padding:16px;background:#edf6ef;border-radius:8px;">
+                    <strong>QR scans</strong><br>
+                    {{ returnloop_admin_stats.total_scans }}
+                </div>
+            </div>
+            <p style="margin-top:12px;color:#555;">
+                Sales totals include only paid orders with an amount recorded by an administrator.
+                SMS alerts are not available yet; no SMS credits are sold until a provider is configured.
+            </p>
+        </section>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}

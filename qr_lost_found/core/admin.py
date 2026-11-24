@@ -4,12 +4,14 @@ from django.contrib.auth.admin import UserAdmin
 from django.conf import settings
 from django.http import HttpResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html
 
 from io import BytesIO
 from pathlib import Path
 
 import qrcode
+import uuid
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -18,7 +20,8 @@ from .models import (
     QRCode,
     StickerOrder,
     FinderNotification,
-    QRScan
+    QRScan,
+    SupportMessage
 )
 
 
@@ -253,11 +256,33 @@ def activate_qr_codes(modeladmin, request, queryset):
 
         return
 
-    updated = queryset.update(is_active=True)
+    updated = 0
+    skipped = 0
+
+    for qr_code in queryset.select_related("user"):
+        has_delivered_paid_order = StickerOrder.objects.filter(
+            user=qr_code.user,
+            payment_status="paid",
+            order_status__in=("delivered", "active")
+        ).exists()
+
+        if not has_delivered_paid_order:
+            skipped += 1
+            continue
+
+        qr_code.is_active = True
+        qr_code.save(update_fields=["is_active"])
+        StickerOrder.objects.filter(
+            user=qr_code.user,
+            payment_status="paid",
+            order_status="delivered"
+        ).update(order_status="active")
+        updated += 1
 
     modeladmin.message_user(
         request,
-        f"{updated} QR code(s) activated successfully."
+        f"{updated} QR code(s) activated. "
+        f"{skipped} skipped because no paid, delivered order was found."
     )
 
 
@@ -274,11 +299,49 @@ def deactivate_qr_codes(modeladmin, request, queryset):
 
         return
 
-    updated = queryset.update(is_active=False)
+    updated = 0
+
+    for qr_code in queryset.select_related("user"):
+        qr_code.is_active = False
+        qr_code.save(update_fields=["is_active"])
+        StickerOrder.objects.filter(
+            user=qr_code.user,
+            order_status="active"
+        ).update(order_status="delivered")
+        updated += 1
 
     modeladmin.message_user(
         request,
         f"{updated} QR code(s) deactivated successfully."
+    )
+
+
+@admin.action(description="Replace Selected QR Codes")
+def replace_qr_codes(modeladmin, request, queryset):
+    if not request.user.is_superuser:
+        modeladmin.message_user(
+            request,
+            "Only the main administrator can replace QR codes.",
+            level=messages.ERROR
+        )
+        return
+
+    replaced = 0
+    for qr_code in queryset.select_related("user"):
+        qr_code.token = uuid.uuid4()
+        qr_code.is_active = False
+        qr_code.replaced_at = timezone.now()
+        qr_code.save(update_fields=["token", "is_active", "replaced_at"])
+        StickerOrder.objects.filter(
+            user=qr_code.user,
+            order_status="active"
+        ).update(order_status="delivered")
+        replaced += 1
+
+    modeladmin.message_user(
+        request,
+        f"{replaced} QR code(s) replaced and deactivated. "
+        "Activate the replacement after its order is ready."
     )
 
 
@@ -361,68 +424,142 @@ def download_qr_code(modeladmin, request, queryset):
 # ORDER ADMIN ACTIONS
 # =====================================================
 
-@admin.action(description="Mark Selected Orders as Processing")
-def mark_orders_processing(modeladmin, request, queryset):
-
-    updated = queryset.update(
-        order_status="processing"
-    )
-
-    modeladmin.message_user(
-        request,
-        f"{updated} order(s) marked as processing."
-    )
-
-
-@admin.action(description="Mark Selected Orders as Shipped")
-def mark_orders_shipped(modeladmin, request, queryset):
-
-    updated = queryset.update(
-        order_status="shipped"
-    )
-
-    modeladmin.message_user(
-        request,
-        f"{updated} order(s) marked as shipped."
-    )
-
-
 @admin.action(description="Mark Selected Orders as Delivered")
 def mark_orders_delivered(modeladmin, request, queryset):
-
-    updated = queryset.update(
-        order_status="delivered"
-    )
+    updated = 0
+    skipped = 0
+    for order in queryset:
+        if (
+            order.payment_status != "paid"
+            or not QRCode.objects.filter(user=order.user).exists()
+            or order.order_status not in ("paid", "shipped", "delivered")
+        ):
+            skipped += 1
+            continue
+        order.order_status = "delivered"
+        order.save(update_fields=["order_status"])
+        updated += 1
 
     modeladmin.message_user(
         request,
-        f"{updated} order(s) marked as delivered."
+        f"{updated} order(s) marked as delivered. "
+        f"{skipped} skipped: payment or QR requirements missing."
     )
 
 
 @admin.action(description="Mark Selected Payments as Paid")
 def mark_payments_paid(modeladmin, request, queryset):
+    updated = 0
+    skipped = 0
+    for order in queryset.select_related("user"):
+        if (
+            order.amount_due is None
+            or order.order_status == "cancelled"
+        ):
+            skipped += 1
+            continue
+        if not QRCode.objects.filter(user=order.user).exists():
+            skipped += 1
+            continue
 
-    updated = queryset.update(
-        payment_status="paid"
-    )
+        order.payment_status = "paid"
+        if order.order_status in ("pending", "generated", "processing"):
+            order.order_status = "paid"
+        order.save(update_fields=["payment_status", "order_status"])
+        updated += 1
 
     modeladmin.message_user(
         request,
-        f"{updated} payment(s) marked as paid."
+        f"{updated} payment(s) marked as paid. "
+        f"{skipped} skipped: issue a QR and enter the agreed price first."
     )
 
 
 @admin.action(description="Mark Selected Payments as Unpaid")
 def mark_payments_unpaid(modeladmin, request, queryset):
-
-    updated = queryset.update(
-        payment_status="unpaid"
-    )
+    updated = 0
+    skipped = 0
+    for order in queryset:
+        if order.order_status in ("delivered", "active"):
+            skipped += 1
+            continue
+        order.payment_status = "unpaid"
+        if order.order_status == "paid":
+            order.order_status = (
+                "generated"
+                if QRCode.objects.filter(user=order.user).exists()
+                else "pending"
+            )
+        order.save(update_fields=["payment_status", "order_status"])
+        updated += 1
 
     modeladmin.message_user(
         request,
-        f"{updated} payment(s) marked as unpaid."
+        f"{updated} payment(s) marked as unpaid. "
+        f"{skipped} delivered or active order(s) were left unchanged."
+    )
+
+
+@admin.action(description="Issue QR and Mark Orders Generated")
+def generate_order_qr_codes(modeladmin, request, queryset):
+    if not request.user.is_superuser:
+        modeladmin.message_user(
+            request,
+            "Only the main administrator can issue QR codes.",
+            level=messages.ERROR
+        )
+        return
+
+    generated = 0
+    skipped = 0
+    for order in queryset.select_related("user"):
+        if order.order_status not in ("pending", "processing", "generated"):
+            skipped += 1
+            continue
+        QRCode.objects.get_or_create(user=order.user)
+        order.order_status = "generated"
+        order.save(update_fields=["order_status"])
+        generated += 1
+
+    modeladmin.message_user(
+        request,
+        f"QR issued for {generated} order(s). "
+        f"{skipped} cancelled order(s) skipped."
+    )
+
+
+@admin.action(description="Mark Delivered Orders Active")
+def activate_delivered_orders(modeladmin, request, queryset):
+    if not request.user.is_superuser:
+        modeladmin.message_user(
+            request,
+            "Only the main administrator can activate QR codes.",
+            level=messages.ERROR
+        )
+        return
+
+    activated = 0
+    skipped = 0
+    for order in queryset.select_related("user"):
+        qr_code = QRCode.objects.filter(user=order.user).first()
+        if (
+            order.payment_status != "paid"
+            or order.order_status != "delivered"
+            or qr_code is None
+        ):
+            skipped += 1
+            continue
+
+        qr_code.is_active = True
+        qr_code.save(update_fields=["is_active"])
+        order.order_status = "active"
+        order.save(update_fields=["order_status"])
+        activated += 1
+
+    modeladmin.message_user(
+        request,
+        f"{activated} delivered order(s) activated. "
+        f"{skipped} skipped: payment, delivery, or QR requirements missing."
     )
 
 
@@ -437,6 +574,7 @@ class ReturnLoopUserAdmin(UserAdmin):
         "email",
         "first_name",
         "last_name",
+        "display_member_type",
         "is_active",
         "is_staff",
         "date_joined"
@@ -462,6 +600,13 @@ class ReturnLoopUserAdmin(UserAdmin):
 
     list_per_page = 25
 
+    @admin.display(description="Member Type")
+    def display_member_type(self, obj):
+        profile = getattr(obj, "userprofile", None)
+        if profile and profile.member_type:
+            return profile.get_member_type_display()
+        return "-"
+
 
 # Replace Django's default User admin with ReturnLoop's improved version.
 
@@ -483,12 +628,14 @@ class QRCodeAdmin(admin.ModelAdmin):
         "display_email",
         "display_token",
         "display_status",
-        "generated_at"
+        "generated_at",
+        "replaced_at"
     )
 
     list_filter = (
         "is_active",
-        "generated_at"
+        "generated_at",
+        "replaced_at"
     )
 
     search_fields = (
@@ -502,7 +649,8 @@ class QRCodeAdmin(admin.ModelAdmin):
     readonly_fields = (
         "token",
         "display_scan_url",
-        "generated_at"
+        "generated_at",
+        "replaced_at"
     )
 
     fields = (
@@ -510,13 +658,15 @@ class QRCodeAdmin(admin.ModelAdmin):
         "token",
         "display_scan_url",
         "is_active",
-        "generated_at"
+        "generated_at",
+        "replaced_at"
     )
 
     actions = [
         activate_qr_codes,
         deactivate_qr_codes,
-        download_qr_code
+        download_qr_code,
+        replace_qr_codes
     ]
 
     @admin.display(description="QR Owner", ordering="user__username")
@@ -595,14 +745,10 @@ class StickerOrderAdmin(admin.ModelAdmin):
         "display_customer",
         "package",
         "quantity",
+        "amount_due",
         "order_status",
         "payment_status",
         "created_at"
-    )
-
-    list_editable = (
-        "order_status",
-        "payment_status"
     )
 
     list_filter = (
@@ -632,11 +778,11 @@ class StickerOrderAdmin(admin.ModelAdmin):
     list_per_page = 25
 
     actions = [
-        mark_orders_processing,
-        mark_orders_shipped,
+        generate_order_qr_codes,
         mark_orders_delivered,
         mark_payments_paid,
-        mark_payments_unpaid
+        mark_payments_unpaid,
+        activate_delivered_orders
     ]
 
     fieldsets = (
@@ -650,6 +796,7 @@ class StickerOrderAdmin(admin.ModelAdmin):
             "fields": (
                 "package",
                 "quantity",
+                "amount_due",
             )
         }),
 
@@ -689,12 +836,17 @@ class UserProfileAdmin(admin.ModelAdmin):
         "full_name",
         "user",
         "phone",
+        "member_type",
+        "institution_name",
+        "affiliation_id",
         "created_at"
     )
 
     search_fields = (
         "full_name",
         "phone",
+        "institution_name",
+        "affiliation_id",
         "user__username",
         "user__email"
     )
@@ -769,3 +921,24 @@ class QRScanAdmin(admin.ModelAdmin):
     def display_owner(self, obj):
 
         return obj.qr_code.user.username
+
+
+@admin.register(SupportMessage)
+class SupportMessageAdmin(admin.ModelAdmin):
+    list_display = (
+        "subject",
+        "name",
+        "email",
+        "is_resolved",
+        "submitted_at",
+    )
+    list_filter = ("is_resolved", "submitted_at")
+    list_editable = ("is_resolved",)
+    search_fields = ("name", "email", "subject", "message")
+    readonly_fields = ("submitted_at",)
+    ordering = ("is_resolved", "-submitted_at")
+    date_hierarchy = "submitted_at"
+    list_per_page = 25
+
+    def has_add_permission(self, request):
+        return False

@@ -41,6 +41,9 @@ class UserProfileForm(forms.ModelForm):
         fields = [
             'full_name',
             'phone',
+            'member_type',
+            'institution_name',
+            'affiliation_id',
         ]
 
         widgets = {
@@ -52,6 +55,20 @@ class UserProfileForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter your phone number'
+            }),
+
+            'member_type': forms.Select(attrs={
+                'class': 'form-control',
+            }),
+
+            'institution_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your university or institution'
+            }),
+
+            'affiliation_id': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Optional student or staff ID'
             }),
         }
 
@@ -91,3 +108,83 @@ class UserProfileForm(forms.ModelForm):
             self.user.save()
 
         return profile
+
+
+class ContactForm(forms.Form):
+    name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    subject = forms.CharField(
+        max_length=180,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    message = forms.CharField(
+        max_length=3000,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 5,
+            'maxlength': '3000',
+        })
+    )
+    website = forms.CharField(
+        required=False,
+        label='Leave this field empty',
+        widget=forms.TextInput(attrs={
+            'class': 'visually-hidden',
+            'tabindex': '-1',
+            'autocomplete': 'off',
+            'aria-hidden': 'true',
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('website'):
+            raise forms.ValidationError(
+                'Please leave the hidden field empty.'
+            )
+        return cleaned_data
+
+
+class FinderNotificationForm(forms.Form):
+    message = forms.CharField(
+        max_length=2000,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'id': 'message',
+            'maxlength': '2000',
+            'required': True,
+            'placeholder': 'Describe the item and where it is safe to collect.',
+        })
+    )
+    location = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'id': 'location',
+            'maxlength': '255',
+            'placeholder': 'Optional: where did you find it?',
+        })
+    )
+    website = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'visually-hidden',
+            'tabindex': '-1',
+            'autocomplete': 'off',
+            'aria-hidden': 'true',
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('website'):
+            raise forms.ValidationError(
+                'Please leave the hidden field empty.'
+            )
+        return cleaned_data

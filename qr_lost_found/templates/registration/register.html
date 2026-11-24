@@ -142,6 +142,36 @@
 
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="{{ form.member_type.id_for_label }}">
+                                Student or Staff
+                            </label>
+                            {{ form.member_type }}
+                            {% for error in form.member_type.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="{{ form.institution_name.id_for_label }}">
+                                University / Institution
+                            </label>
+                            {{ form.institution_name }}
+                            {% for error in form.institution_name.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" for="{{ form.affiliation_id.id_for_label }}">
+                                Student / Staff ID (optional)
+                            </label>
+                            {{ form.affiliation_id }}
+                            {% for error in form.affiliation_id.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
                         <hr class="my-4">
 
                         <h5 class="fw-bold mb-3"
@@ -186,6 +216,8 @@
                             {% endfor %}
 
                         </div>
+
+                        {{ form.website }}
 
                         <button type="submit"
                                 class="btn btn-success w-100 py-3 fw-bold"

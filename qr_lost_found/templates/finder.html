@@ -209,19 +209,22 @@
 
                 {% csrf_token %}
 
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
                 <div class="finder-field">
 
-                    <label for="message">
+                    <label for="{{ form.message.id_for_label }}">
                         Your Message
                     </label>
 
-                    <textarea
-                        id="message"
-                        name="message"
-                        placeholder="Describe the item you found and any useful details..."
-                        maxlength="2000"
-                        required
-                    ></textarea>
+                    {{ form.message }}
+                    {% for error in form.message.errors %}
+                        <div class="text-danger small mt-2">{{ error }}</div>
+                    {% endfor %}
 
                     <div class="finder-hint">
                         Please provide enough details to help the owner identify their item.
@@ -232,17 +235,14 @@
 
                 <div class="finder-field">
 
-                    <label for="location">
+                    <label for="{{ form.location.id_for_label }}">
                         Where Did You Find It?
                     </label>
 
-                    <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        placeholder="e.g. University library, cafeteria..."
-                        maxlength="255"
-                    >
+                    {{ form.location }}
+                    {% for error in form.location.errors %}
+                        <div class="text-danger small mt-2">{{ error }}</div>
+                    {% endfor %}
 
                     <div class="finder-hint">
                         Providing a location helps the owner recover their belongings.
@@ -250,6 +250,7 @@
 
                 </div>
 
+                {{ form.website }}
 
                 <button type="submit" class="notify-button">
                     Notify Owner →
@@ -259,8 +260,9 @@
 
 
             <div class="finder-privacy">
-                🔒 <strong>Your privacy matters.</strong><br>
-                Your personal contact information is not shared with the owner.
+                <strong>Your privacy matters.</strong><br>
+                No owner email or phone number is shown on this page.
+                Your message is saved to the owner's ReturnLoop dashboard.
             </div>
 
         </div>

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}About ReturnLoop{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="p-4 p-md-5 bg-white shadow-sm rounded-4">
+                <span class="badge rounded-pill px-3 py-2 mb-3" style="background:#d8eee0;color:#087f5b;">ABOUT RETURNLOOP</span>
+                <h1 class="fw-bold" style="color:#10372b;">A simpler way to return lost belongings</h1>
+                <p class="lead mt-3" style="color:#637b6e;">
+                    ReturnLoop connects the person who finds an item with its owner,
+                    without displaying the owner's email address or phone number.
+                </p>
+
+                <div class="row g-4 mt-2">
+                    <div class="col-md-4">
+                        <h2 class="h5 fw-bold">1. Register</h2>
+                        <p>Students and staff create an account and provide their institution details.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h2 class="h5 fw-bold">2. Request a sticker</h2>
+                        <p>Choose a package. An administrator confirms the price, payment, and order.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h2 class="h5 fw-bold">3. Get notified</h2>
+                        <p>An administrator issues and activates the QR sticker. A finder can then leave a message for you.</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-success mt-4 mb-0">
+                    QR images and scan links are kept out of customer dashboards.
+                    Only authorized administrators can issue, replace, download, or activate QR codes.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

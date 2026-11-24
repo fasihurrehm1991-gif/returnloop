@@ -8,12 +8,22 @@
 - QR sticker generation and finder notifications
 
 ## Non-negotiable rules
-1. One unique QR code per registered user, not per item.
+1. At most one unique QR code per registered user, not per item.
 2. Only administrators can generate, download, print, activate, deactivate or replace QR codes.
 3. Never show a QR image, QR URL or downloadable QR file in the user dashboard.
 4. Finders can submit a notification without registering.
 5. Inactive QR codes cannot accept notifications.
 6. Never reveal the owner's phone number or email to a finder.
+
+## Proposal workflows and current limits
+- Registration records whether the member is a student or staff member, their institution, and an optional student/staff ID. Registration is immediately usable; QR issuance remains administrator-controlled.
+- An administrator issues the QR from a sticker order. The intended order path is Pending → Generated → Paid → Delivered → Active. Payment is manually confirmed; the admin must record the agreed order amount before marking it paid.
+- Account pages do not expose QR tokens or images. Administrators can replace a QR, which invalidates the previous token and leaves the new code inactive until it is ready.
+- About, Pricing, and Contact / Support pages are available. Support requests appear in the admin inbox.
+- Pricing has intentionally not been invented: all sticker packages show “Price soon” until the owner sets rates. Placing an order is a request, not a charge.
+- Finder submissions use a honeypot and a database-backed limit of five messages per QR code per ten minutes. Repeated scans from one browser session are recorded no more than once per ten minutes.
+- Email alerts work when SMTP is configured. SMS, SMS credits, and online payment processing are not integrated; do not advertise them as available. SMS remains a planned feature pending provider and package decisions.
+- The admin homepage shows account, order, QR, finder-message, scan, support, and recorded paid-sales totals. Sales only include paid orders with an amount entered by an administrator.
 
 ## Run on Windows
 1. Install Python 3.11 or newer and enable **Add Python to PATH**.

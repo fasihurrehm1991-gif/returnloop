@@ -1,5 +1,6 @@
 import logging
 import smtplib
+from datetime import timedelta
 
 from django import forms
 from django.conf import settings
@@ -21,10 +22,15 @@ from .models import (
     QRScan,
     FinderNotification,
     UserProfile,
-    StickerOrder
+    StickerOrder,
+    SupportMessage
 )
 
-from .forms import UserProfileForm
+from .forms import (
+    ContactForm,
+    FinderNotificationForm,
+    UserProfileForm,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -46,6 +52,34 @@ class RegistrationForm(UserCreationForm):
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Enter your phone number'
+        })
+    )
+    member_type = forms.ChoiceField(
+        choices=UserProfile.MEMBER_TYPE_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    institution_name = forms.CharField(
+        max_length=180,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your university or institution'
+        })
+    )
+    affiliation_id = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Optional student or staff ID'
+        })
+    )
+    website = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'visually-hidden',
+            'tabindex': '-1',
+            'autocomplete': 'off',
+            'aria-hidden': 'true',
         })
     )
 
@@ -87,6 +121,14 @@ class RegistrationForm(UserCreationForm):
 
         return email
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('website'):
+            raise forms.ValidationError(
+                'Please leave the hidden field empty.'
+            )
+        return cleaned_data
+
     def save(self, commit=True):
 
         user = super().save(commit=False)
@@ -102,6 +144,48 @@ class RegistrationForm(UserCreationForm):
 def home(request):
 
     return render(request, 'welcome.html')
+
+
+def about(request):
+    return render(request, 'about.html')
+
+
+def pricing(request):
+    return render(request, 'pricing.html')
+
+
+def contact(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            rate_limit_start = timezone.now() - timedelta(hours=1)
+            recent_submissions = SupportMessage.objects.filter(
+                email__iexact=form.cleaned_data['email'],
+                submitted_at__gte=rate_limit_start
+            ).count()
+            if recent_submissions >= 5:
+                form.add_error(
+                    None,
+                    'Too many requests were sent from this email. '
+                    'Please try again later.'
+                )
+            else:
+                SupportMessage.objects.create(
+                    name=form.cleaned_data['name'],
+                    email=form.cleaned_data['email'],
+                    subject=form.cleaned_data['subject'],
+                    message=form.cleaned_data['message'],
+                    user=request.user if request.user.is_authenticated else None,
+                )
+                messages.success(
+                    request,
+                    'Your support message has been received.'
+                )
+                return redirect('contact')
+    else:
+        form = ContactForm()
+
+    return render(request, 'contact.html', {'form': form})
 
 
 def register(request):
@@ -125,17 +209,19 @@ def register(request):
                 user=user,
                 defaults={
                     'full_name': full_name,
-                    'phone': form.cleaned_data['phone']
+                    'phone': form.cleaned_data['phone'],
+                    'member_type': form.cleaned_data['member_type'],
+                    'institution_name': form.cleaned_data['institution_name'],
+                    'affiliation_id': form.cleaned_data['affiliation_id'],
                 }
             )
-
-            QRCode.objects.get_or_create(user=user)
 
             login(request, user)
 
             messages.success(
                 request,
-                'Your ReturnLoop account has been created successfully!'
+                'Your account is ready. Place a sticker order and an '
+                'administrator will issue and activate its QR code.'
             )
 
             return redirect('dashboard')
@@ -189,6 +275,7 @@ def dashboard(request):
             'notifications': notifications,
             'unread_count': unread_count,
             'recent_orders': orders,
+            'qr_code_exists': qr_code is not None,
             'qr_is_active': qr_is_active,
             'recent_scans': recent_scans,
             'total_scans': total_scans
@@ -370,122 +457,130 @@ def scan_qr(request, token):
     )
 
     if request.method == 'POST':
-
-        message = request.POST.get('message', '').strip()
-        location = request.POST.get('location', '').strip()
-
-        if message:
-
-            FinderNotification.objects.create(
+        form = FinderNotificationForm(request.POST)
+        if form.is_valid():
+            rate_limit_start = timezone.now() - timedelta(minutes=10)
+            recent_submissions = FinderNotification.objects.filter(
                 qr_code=qr_code,
-                message=message,
-                location=location
-            )
+                created_at__gte=rate_limit_start
+            ).count()
 
-            owner_email = qr_code.user.email
-
-            if owner_email and settings.EMAIL_DELIVERY_CONFIGURED:
-
-                owner_name = (
-                    qr_code.user.get_full_name()
-                    or qr_code.user.username
+            if recent_submissions >= 5:
+                form.add_error(
+                    None,
+                    'Too many messages were submitted for this QR code. '
+                    'Please try again in a few minutes.'
+                )
+            else:
+                message = form.cleaned_data['message'].strip()
+                location = form.cleaned_data['location'].strip()
+                FinderNotification.objects.create(
+                    qr_code=qr_code,
+                    message=message,
+                    location=location
                 )
 
-                dashboard_url = request.build_absolute_uri(
-                    reverse('dashboard')
-                )
+                owner_email = qr_code.user.email
 
-                email_context = {
-                    'owner_name': owner_name,
-                    'message': message,
-                    'location': location or 'Not provided',
-                    'date': timezone.localtime().strftime(
-                        '%d %B %Y, %I:%M %p'
-                    ),
-                    'dashboard_url': dashboard_url,
-                }
-
-                html_message = render_to_string(
-                    'emails/found_notification.html',
-                    email_context
-                )
-
-                plain_message = (
-                    f"Hello {owner_name},\n\n"
-                    "Someone has submitted a found-item notification "
-                    "for your ReturnLoop QR code.\n\n"
-                    f"Message: {message}\n"
-                    f"Location: {location or 'Not provided'}\n\n"
-                    "Please log in to your ReturnLoop dashboard "
-                    "to view your notification."
-                )
-
-                email = EmailMultiAlternatives(
-                    subject='Someone Found Your Belonging - ReturnLoop',
-                    body=plain_message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[owner_email]
-                )
-
-                email.attach_alternative(
-                    html_message,
-                    'text/html'
-                )
-
-                logo_path = (
-                    settings.BASE_DIR
-                    / 'static'
-                    / 'images'
-                    / 'returnloop-logo.png.png'
-                )
-
-                try:
-                    with open(logo_path, 'rb') as logo_file:
-                        logo = MIMEImage(logo_file.read())
-                        logo.add_header(
-                            'Content-ID',
-                            '<returnloop_logo>'
-                        )
-                        logo.add_header(
-                            'Content-Disposition',
-                            'inline',
-                            filename='returnloop-logo.png.png'
-                        )
-                        email.attach(logo)
-                except OSError:
-                    logger.warning(
-                        'ReturnLoop logo could not be attached to finder '
-                        'notification email for QR code %s',
-                        qr_code.token
+                if owner_email and settings.EMAIL_DELIVERY_CONFIGURED:
+                    owner_name = (
+                        qr_code.user.get_full_name()
+                        or qr_code.user.username
+                    )
+                    dashboard_url = request.build_absolute_uri(
+                        reverse('dashboard')
+                    )
+                    email_context = {
+                        'owner_name': owner_name,
+                        'message': message,
+                        'location': location or 'Not provided',
+                        'date': timezone.localtime().strftime(
+                            '%d %B %Y, %I:%M %p'
+                        ),
+                        'dashboard_url': dashboard_url,
+                    }
+                    html_message = render_to_string(
+                        'emails/found_notification.html',
+                        email_context
+                    )
+                    plain_message = (
+                        f"Hello {owner_name},\n\n"
+                        "Someone has submitted a found-item notification "
+                        "for your ReturnLoop QR code.\n\n"
+                        f"Message: {message}\n"
+                        f"Location: {location or 'Not provided'}\n\n"
+                        "Please log in to your ReturnLoop dashboard "
+                        "to view your notification."
+                    )
+                    email = EmailMultiAlternatives(
+                        subject='Someone Found Your Belonging - ReturnLoop',
+                        body=plain_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[owner_email]
+                    )
+                    email.attach_alternative(
+                        html_message,
+                        'text/html'
                     )
 
-                try:
-                    email.send(fail_silently=False)
-                except (OSError, smtplib.SMTPException):
-                    logger.exception(
-                        'Could not send finder notification email '
-                        'for QR code %s',
-                        qr_code.token
+                    logo_path = (
+                        settings.BASE_DIR
+                        / 'static'
+                        / 'images'
+                        / 'returnloop-logo.png.png'
                     )
+                    try:
+                        with open(logo_path, 'rb') as logo_file:
+                            logo = MIMEImage(logo_file.read())
+                            logo.add_header(
+                                'Content-ID',
+                                '<returnloop_logo>'
+                            )
+                            logo.add_header(
+                                'Content-Disposition',
+                                'inline',
+                                filename='returnloop-logo.png.png'
+                            )
+                            email.attach(logo)
+                    except OSError:
+                        logger.warning(
+                            'ReturnLoop logo could not be attached to finder '
+                            'notification email for QR code %s',
+                            qr_code.token
+                        )
+
+                    try:
+                        email.send(fail_silently=False)
+                    except (OSError, smtplib.SMTPException):
+                        logger.exception(
+                            'Could not send finder notification email '
+                            'for QR code %s',
+                            qr_code.token
+                        )
+                        messages.warning(
+                            request,
+                            'Your message was saved, but the owner email '
+                            'could not be delivered.'
+                        )
+
+                elif not settings.EMAIL_DELIVERY_CONFIGURED:
                     messages.warning(
                         request,
-                        'Your message was saved, but the owner email '
-                        'could not be delivered.'
+                        'Your message was saved. Email alerts are not set up '
+                        'yet; the owner can still view it in their dashboard.'
                     )
 
-            elif not settings.EMAIL_DELIVERY_CONFIGURED:
-                messages.warning(
-                    request,
-                    'Your message was saved. Email alerts are not set up '
-                    'yet; the owner can still view it in their dashboard.'
-                )
-
-            return render(request, 'finder_success.html')
-
-        messages.error(request, 'Please enter a message for the owner.')
-
+                return render(request, 'finder_success.html')
     else:
+        form = FinderNotificationForm()
+        scan_session_key = f"returnloop_qr_scan_{qr_code.pk}"
+        last_scan = request.session.get(scan_session_key)
+        now = timezone.now()
+        if (
+            not isinstance(last_scan, (int, float))
+            or now.timestamp() - last_scan >= 600
+        ):
+            QRScan.objects.create(qr_code=qr_code)
+        request.session[scan_session_key] = now.timestamp()
 
-        QRScan.objects.create(qr_code=qr_code)
-
-    return render(request, 'finder.html')
+    return render(request, 'finder.html', {'form': form})

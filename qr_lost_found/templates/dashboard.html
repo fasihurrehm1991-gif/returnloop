@@ -97,9 +97,12 @@
                 {% if qr_is_active %}
                     <h2 class="active-status">Active</h2>
                     <span>Ready to be scanned</span>
+                {% elif qr_code_exists %}
+                    <h2 class="inactive-status">Issued</h2>
+                    <span>Awaiting administrator activation</span>
                 {% else %}
-                    <h2 class="inactive-status">Inactive</h2>
-                    <span>Not currently activated</span>
+                    <h2 class="inactive-status">Not Issued</h2>
+                    <span>Place a sticker order to request your QR</span>
                 {% endif %}
 
             </div>
@@ -962,6 +965,13 @@
 }
 
 .status-delivered {
+    background: #def3e5;
+    color: #087443;
+}
+
+.status-generated,
+.status-paid,
+.status-active {
     background: #def3e5;
     color: #087443;
 }

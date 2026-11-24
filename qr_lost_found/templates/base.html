@@ -91,6 +91,10 @@
 
             {% endif %}
 
+            <a href="{% url 'about' %}">About</a>
+            <a href="{% url 'pricing' %}">Pricing</a>
+            <a href="{% url 'contact' %}">Contact / Support</a>
+
             <a href="/admin/" class="admin-nav-link">
                 Admin Login
             </a>
@@ -140,6 +144,11 @@
     <footer>
 
         SCAN IT. NOTIFY THE OWNER. RETURN IT.
+        <div>
+            <a href="{% url 'about' %}">About</a>
+            · <a href="{% url 'pricing' %}">Pricing</a>
+            · <a href="{% url 'contact' %}">Contact / Support</a>
+        </div>
 
     </footer>
 

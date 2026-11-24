@@ -7,7 +7,12 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 
-from .models import QRCode, StickerOrder
+from .models import (
+    FinderNotification,
+    QRCode,
+    StickerOrder,
+    SupportMessage,
+)
 
 
 class QRFlowTests(TestCase):
@@ -18,10 +23,15 @@ class QRFlowTests(TestCase):
             email='owner@example.com',
             password='Strong-Test-Password-123!',
         )
-        self.qr = QRCode.objects.get(user=self.user)
+        self.qr = QRCode.objects.create(user=self.user)
 
-    def test_registration_creates_one_qr_code(self):
-        self.assertEqual(QRCode.objects.filter(user=self.user).count(), 1)
+    def test_user_creation_does_not_issue_qr_automatically(self):
+        new_user = User.objects.create_user(
+            username='no-qr',
+            email='no-qr@example.com',
+            password='Strong-Test-Password-123!',
+        )
+        self.assertFalse(QRCode.objects.filter(user=new_user).exists())
 
     def test_inactive_qr_code_cannot_be_scanned(self):
         response = self.client.get(
@@ -34,6 +44,13 @@ class QRFlowTests(TestCase):
             username='administrator',
             email='administrator@example.com',
             password='Strong-Admin-Password-123!',
+        )
+        StickerOrder.objects.create(
+            user=self.user,
+            package='single',
+            amount_due='500.00',
+            order_status='delivered',
+            payment_status='paid',
         )
         self.client.force_login(admin_user)
         changelist = reverse('admin:core_qrcode_changelist')
@@ -58,6 +75,71 @@ class QRFlowTests(TestCase):
         self.assertEqual(response['Content-Type'], 'image/png')
         self.assertIn('attachment;', response['Content-Disposition'])
 
+    def test_admin_can_replace_qr_and_old_token_becomes_unusable(self):
+        old_token = self.qr.token
+        admin_user = User.objects.create_superuser(
+            username='qr-admin',
+            email='qr-admin@example.com',
+            password='Strong-Admin-Password-123!',
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.post(
+            reverse('admin:core_qrcode_changelist'),
+            {
+                'action': 'replace_qr_codes',
+                '_selected_action': [str(self.qr.pk)],
+                'index': '0',
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.qr.refresh_from_db()
+        self.assertNotEqual(self.qr.token, old_token)
+        self.assertFalse(self.qr.is_active)
+        self.assertIsNotNone(self.qr.replaced_at)
+
+    def test_qr_cannot_be_activated_before_a_paid_delivered_order(self):
+        admin_user = User.objects.create_superuser(
+            username='activation-admin',
+            email='activation-admin@example.com',
+            password='Strong-Admin-Password-123!',
+        )
+        self.client.force_login(admin_user)
+
+        self.client.post(
+            reverse('admin:core_qrcode_changelist'),
+            {
+                'action': 'activate_qr_codes',
+                '_selected_action': [str(self.qr.pk)],
+                'index': '0',
+            },
+        )
+
+        self.qr.refresh_from_db()
+        self.assertFalse(self.qr.is_active)
+
+    def test_customer_dashboard_does_not_expose_qr_token_or_image(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, str(self.qr.token))
+        self.assertNotContains(response, 'download_qr_code')
+
+    def test_admin_dashboard_shows_returnloop_business_statistics(self):
+        admin_user = User.objects.create_superuser(
+            username='stats-admin',
+            email='stats-admin@example.com',
+            password='Strong-Admin-Password-123!',
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.get(reverse('admin:index'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'ReturnLoop overview')
+        self.assertContains(response, 'Recorded paid sales')
+
     def test_active_qr_code_records_a_scan_without_owner_details(self):
         self.qr.is_active = True
         self.qr.save(update_fields=['is_active'])
@@ -71,6 +153,8 @@ class QRFlowTests(TestCase):
 
     def test_profile_update_changes_profile_and_user_name(self):
         self.client.login(username='owner', password='Strong-Test-Password-123!')
+        profile_page = self.client.get(reverse('profile'))
+        self.assertEqual(profile_page.status_code, 200)
 
         response = self.client.post(reverse('profile'), {
             'full_name': 'Updated Owner',
@@ -84,13 +168,16 @@ class QRFlowTests(TestCase):
         self.assertEqual(self.user.first_name, 'Updated')
         self.assertEqual(self.user.last_name, 'Owner')
 
-    def test_registration_creates_profile_and_qr(self):
+    def test_registration_saves_institution_details_without_issuing_qr(self):
         response = self.client.post(reverse('register'), {
             'first_name': 'New',
             'last_name': 'Member',
             'username': 'new-member',
             'email': 'new-member@example.com',
             'phone': '03001234567',
+            'member_type': 'student',
+            'institution_name': 'Example University',
+            'affiliation_id': 'STU-100',
             'password1': 'Strong-New-Member-2026!',
             'password2': 'Strong-New-Member-2026!',
         })
@@ -99,7 +186,13 @@ class QRFlowTests(TestCase):
         new_user = User.objects.get(username='new-member')
         self.assertEqual(new_user.userprofile.full_name, 'New Member')
         self.assertEqual(new_user.userprofile.phone, '03001234567')
-        self.assertEqual(QRCode.objects.filter(user=new_user).count(), 1)
+        self.assertEqual(new_user.userprofile.member_type, 'student')
+        self.assertEqual(
+            new_user.userprofile.institution_name,
+            'Example University',
+        )
+        self.assertEqual(new_user.userprofile.affiliation_id, 'STU-100')
+        self.assertFalse(QRCode.objects.filter(user=new_user).exists())
 
     def test_registration_rejects_duplicate_email_case_insensitively(self):
         response = self.client.post(reverse('register'), {
@@ -108,12 +201,32 @@ class QRFlowTests(TestCase):
             'username': 'another-owner',
             'email': 'OWNER@example.com',
             'phone': '03001234567',
+            'member_type': 'staff',
+            'institution_name': 'Example University',
             'password1': 'Strong-New-Owner-2026!',
             'password2': 'Strong-New-Owner-2026!',
         })
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(User.objects.filter(username='another-owner').exists())
+
+    def test_registration_honeypot_displays_validation_error(self):
+        response = self.client.post(reverse('register'), {
+            'first_name': 'Automated',
+            'last_name': 'Member',
+            'username': 'automated-member',
+            'email': 'automated@example.com',
+            'phone': '03001234567',
+            'member_type': 'student',
+            'institution_name': 'Example University',
+            'website': 'bot.example',
+            'password1': 'Strong-Automated-Member-2026!',
+            'password2': 'Strong-Automated-Member-2026!',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Please leave the hidden field empty.')
+        self.assertFalse(User.objects.filter(username='automated-member').exists())
 
     @override_settings(
         EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
@@ -134,6 +247,33 @@ class QRFlowTests(TestCase):
         self.assertEqual(notification.location, 'Library')
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.user.email])
+
+    def test_finder_honeypot_and_rate_limit_reject_spam(self):
+        self.qr.is_active = True
+        self.qr.save(update_fields=['is_active'])
+        url = reverse('scan_qr', args=[self.qr.token])
+
+        response = self.client.post(
+            url,
+            {'message': 'Found your bag', 'website': 'bot.example'},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Please leave the hidden field empty.')
+        self.assertFalse(self.qr.notifications.exists())
+
+        for _ in range(5):
+            FinderNotification.objects.create(
+                qr_code=self.qr,
+                message='Existing notification',
+            )
+
+        response = self.client.post(
+            url,
+            {'message': 'Another message', 'location': ''},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Too many messages')
+        self.assertEqual(self.qr.notifications.count(), 5)
 
     def test_mark_read_only_allows_notification_owner(self):
         User.objects.create_user(
@@ -176,6 +316,11 @@ class QRFlowTests(TestCase):
         order = StickerOrder.objects.get(user=self.user)
         self.assertEqual(order.package, 'three')
         self.assertEqual(order.quantity, 2)
+        order.amount_due = '1200.00'
+        order.save(update_fields=['amount_due'])
+        orders_page = self.client.get(reverse('my_orders'))
+        self.assertEqual(orders_page.status_code, 200)
+        self.assertContains(orders_page, 'PKR 1200.00')
 
     def test_invalid_order_is_not_created(self):
         self.client.login(username='owner', password='Strong-Test-Password-123!')
@@ -187,6 +332,112 @@ class QRFlowTests(TestCase):
 
         self.assertRedirects(response, reverse('place_order'))
         self.assertFalse(StickerOrder.objects.filter(user=self.user).exists())
+
+    def test_order_admin_workflow_issues_qr_confirms_payment_and_activates(self):
+        admin_user = User.objects.create_superuser(
+            username='order-admin',
+            email='order-admin@example.com',
+            password='Strong-Admin-Password-123!',
+        )
+        order = StickerOrder.objects.create(
+            user=self.user,
+            package='three',
+            amount_due='1200.00',
+        )
+        self.client.force_login(admin_user)
+        changelist = reverse('admin:core_stickerorder_changelist')
+
+        self.client.post(changelist, {
+            'action': 'generate_order_qr_codes',
+            '_selected_action': [str(order.pk)],
+            'index': '0',
+        })
+        order.refresh_from_db()
+        self.assertEqual(order.order_status, 'generated')
+        self.assertTrue(QRCode.objects.filter(user=self.user).exists())
+
+        self.client.post(changelist, {
+            'action': 'mark_payments_paid',
+            '_selected_action': [str(order.pk)],
+            'index': '0',
+        })
+        order.refresh_from_db()
+        self.assertEqual(order.order_status, 'paid')
+        self.assertEqual(order.payment_status, 'paid')
+
+        self.client.post(changelist, {
+            'action': 'mark_orders_delivered',
+            '_selected_action': [str(order.pk)],
+            'index': '0',
+        })
+        order.refresh_from_db()
+        self.assertEqual(order.order_status, 'delivered')
+
+        self.client.post(changelist, {
+            'action': 'activate_delivered_orders',
+            '_selected_action': [str(order.pk)],
+            'index': '0',
+        })
+        order.refresh_from_db()
+        self.qr.refresh_from_db()
+        self.assertEqual(order.order_status, 'active')
+        self.assertTrue(self.qr.is_active)
+
+    def test_admin_paid_action_requires_amount_to_be_recorded(self):
+        admin_user = User.objects.create_superuser(
+            username='payment-admin',
+            email='payment-admin@example.com',
+            password='Strong-Admin-Password-123!',
+        )
+        order = StickerOrder.objects.create(
+            user=self.user,
+            package='single',
+            order_status='generated',
+        )
+        self.client.force_login(admin_user)
+
+        self.client.post(
+            reverse('admin:core_stickerorder_changelist'),
+            {
+                'action': 'mark_payments_paid',
+                '_selected_action': [str(order.pk)],
+                'index': '0',
+            },
+        )
+
+        order.refresh_from_db()
+        self.assertEqual(order.payment_status, 'unpaid')
+        self.assertEqual(order.order_status, 'generated')
+
+    def test_contact_form_saves_support_message_and_rejects_honeypot(self):
+        response = self.client.post(reverse('contact'), {
+            'name': 'Finder',
+            'email': 'finder@example.com',
+            'subject': 'Order question',
+            'message': 'Can you help me with an order?',
+            'website': '',
+        })
+        self.assertRedirects(response, reverse('contact'))
+        self.assertEqual(SupportMessage.objects.count(), 1)
+
+        response = self.client.post(reverse('contact'), {
+            'name': 'Bot',
+            'email': 'bot@example.com',
+            'subject': 'Spam',
+            'message': 'Automated message',
+            'website': 'bot.example',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Please leave the hidden field empty.')
+        self.assertEqual(SupportMessage.objects.count(), 1)
+
+    def test_about_pricing_and_contact_pages_are_available(self):
+        for route in ('about', 'pricing', 'contact'):
+            with self.subTest(route=route):
+                self.assertEqual(
+                    self.client.get(reverse(route)).status_code,
+                    200,
+                )
 
     def test_logout_and_login_flow(self):
         self.client.login(username='owner', password='Strong-Test-Password-123!')

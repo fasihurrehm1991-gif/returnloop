@@ -170,6 +170,13 @@
         color: #087443;
     }
 
+    .status-generated,
+    .status-paid,
+    .status-active {
+        background: #dcf5e5;
+        color: #087443;
+    }
+
     .status-cancelled {
         background: #ffe4e7;
         color: #a51d2d;
@@ -388,7 +395,16 @@
                             </div>
 
 
-                            {% if order.order_status == 'delivered' %}
+                            {% if order.order_status == 'active' %}
+                                <span class="order-status status-active">✓ Active</span>
+
+                            {% elif order.order_status == 'generated' %}
+                                <span class="order-status status-generated">QR issued</span>
+
+                            {% elif order.order_status == 'paid' %}
+                                <span class="order-status status-paid">Payment confirmed</span>
+
+                            {% elif order.order_status == 'delivered' %}
 
                                 <span class="order-status status-delivered">
                                     ✓ Delivered
@@ -445,6 +461,17 @@
 
                                     <p class="detail-value">
                                         {{ order.quantity }}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <span class="detail-label">ORDER AMOUNT</span>
+                                    <p class="detail-value">
+                                        {% if order.amount_due != None %}
+                                            PKR {{ order.amount_due|floatformat:2 }}
+                                        {% else %}
+                                            Price being confirmed
+                                        {% endif %}
                                     </p>
                                 </div>
 
