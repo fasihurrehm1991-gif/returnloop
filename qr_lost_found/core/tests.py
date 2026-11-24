@@ -57,6 +57,30 @@ class QRFlowTests(TestCase):
         self.assertNotContains(member_page, 'Already Have an Account')
         self.assertNotContains(member_page, 'Admin Login')
 
+    def test_authenticated_navigation_marks_current_page_and_emphasizes_logout(self):
+        self.client.force_login(self.user)
+
+        for route in (
+            'home',
+            'dashboard',
+            'my_orders',
+            'profile',
+            'pricing',
+            'contact',
+            'place_order',
+        ):
+            with self.subTest(route=route):
+                response = self.client.get(reverse(route))
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    response.content.count(b'aria-current="page"'),
+                    1,
+                )
+                self.assertContains(
+                    response,
+                    'class="nav-button logout-nav-button"',
+                )
+
     def test_inactive_qr_code_cannot_be_scanned(self):
         response = self.client.get(
             reverse('scan_qr', args=[self.qr.token])

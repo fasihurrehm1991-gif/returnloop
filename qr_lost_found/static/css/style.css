@@ -139,6 +139,34 @@ select {
     color: #07865c;
 }
 
+.site-header nav a.nav-current:not(.order-nav-button) {
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #e4f3e9;
+    color: #07543e;
+    box-shadow: inset 0 -2px #087f5b;
+}
+
+.site-header nav a.order-nav-button.nav-current {
+    background: #07543e !important;
+    box-shadow: 0 0 0 3px #a8d7ba;
+}
+
+.site-header nav .logout-nav-button {
+    padding: 9px 14px;
+    border: 1px solid #e8b8b2;
+    border-radius: 9px;
+    background: #fff1ef;
+    color: #8f2f28;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.site-header nav .logout-nav-button:hover {
+    background: #fce1de;
+    color: #7e211b;
+}
+
 .site-header nav form {
     margin: 0;
 }
