@@ -19,7 +19,7 @@
 - Registration records whether the member is a student or staff member, their institution, and an optional student/staff ID. Registration is immediately usable; QR issuance remains administrator-controlled.
 - An administrator issues the QR from a sticker order. The intended order path is Pending → Generated → Paid → Delivered → Active. Payment is manually confirmed; the admin must record the agreed order amount before marking it paid.
 - Account pages do not expose QR tokens or images. Administrators can replace a QR, which invalidates the previous token and leaves the new code inactive until it is ready.
-- About, Pricing, and Contact / Support pages are available. Support requests appear in the admin inbox.
+- About and Pricing are public; Member Support requires login. Support requests appear in the admin inbox.
 - Pricing has intentionally not been invented: all sticker packages show “Price soon” until the owner sets rates. Placing an order is a request, not a charge.
 - Finder submissions use a honeypot and a database-backed limit of five messages per QR code per ten minutes. Repeated scans from one browser session are recorded no more than once per ten minutes.
 - Email alerts work when SMTP is configured. SMS, SMS credits, and online payment processing are not integrated; do not advertise them as available. SMS remains a planned feature pending provider and package decisions.

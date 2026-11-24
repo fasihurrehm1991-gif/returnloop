@@ -1,8 +1,14 @@
+import logging
+
+from django.conf import settings
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import User
 
 from .models import UserProfile
+
+
+logger = logging.getLogger(__name__)
 
 
 class EmailOrUsernameAuthenticationForm(AuthenticationForm):
@@ -23,6 +29,20 @@ class EmailOrUsernameAuthenticationForm(AuthenticationForm):
                 self.cleaned_data['username'] = user.get_username()
 
         return super().clean()
+
+
+class ReturnLoopPasswordResetForm(PasswordResetForm):
+    def save(self, *args, **kwargs):
+        email = self.cleaned_data.get('email', '')
+        eligible_accounts = sum(1 for _ in self.get_users(email))
+        result = super().save(*args, **kwargs)
+        logger.info(
+            'Password reset processing completed; eligible_accounts=%s, '
+            'email_delivery_configured=%s',
+            eligible_accounts,
+            settings.EMAIL_DELIVERY_CONFIGURED,
+        )
+        return result
 
 
 class UserProfileForm(forms.ModelForm):

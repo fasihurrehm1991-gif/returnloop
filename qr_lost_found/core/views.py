@@ -154,6 +154,7 @@ def pricing(request):
     return render(request, 'pricing.html')
 
 
+@login_required
 def contact(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)

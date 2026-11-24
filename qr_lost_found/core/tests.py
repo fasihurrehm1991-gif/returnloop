@@ -458,6 +458,7 @@ class QRFlowTests(TestCase):
         self.assertEqual(order.order_status, 'generated')
 
     def test_contact_form_saves_support_message_and_rejects_honeypot(self):
+        self.client.force_login(self.user)
         response = self.client.post(reverse('contact'), {
             'name': 'Finder',
             'email': 'finder@example.com',
@@ -479,13 +480,38 @@ class QRFlowTests(TestCase):
         self.assertContains(response, 'Please leave the hidden field empty.')
         self.assertEqual(SupportMessage.objects.count(), 1)
 
+    def test_anonymous_users_cannot_view_or_submit_member_support(self):
+        get_response = self.client.get(reverse('contact'))
+        self.assertRedirects(
+            get_response,
+            f'{reverse("login")}?next={reverse("contact")}',
+        )
+
+        post_response = self.client.post(reverse('contact'), {
+            'name': 'Guest',
+            'email': 'guest@example.com',
+            'subject': 'Support request',
+            'message': 'This should not be saved.',
+        })
+        self.assertRedirects(
+            post_response,
+            f'{reverse("login")}?next={reverse("contact")}',
+        )
+        self.assertFalse(SupportMessage.objects.exists())
+
     def test_about_pricing_and_contact_pages_are_available(self):
-        for route in ('about', 'pricing', 'contact'):
+        for route in ('about', 'pricing'):
             with self.subTest(route=route):
                 self.assertEqual(
                     self.client.get(reverse(route)).status_code,
                     200,
                 )
+
+        self.client.force_login(self.user)
+        self.assertEqual(
+            self.client.get(reverse('contact')).status_code,
+            200,
+        )
 
     def test_logout_and_login_flow(self):
         self.client.login(username='owner', password='Strong-Test-Password-123!')
@@ -548,15 +574,42 @@ class QRFlowTests(TestCase):
         EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
         EMAIL_DELIVERY_CONFIGURED=True,
     )
+    def test_password_reset_logs_when_no_eligible_account_matches(self):
+        with self.assertLogs('core.forms', level='INFO') as captured:
+            response = self.client.post(
+                reverse('password_reset'),
+                {'email': 'unknown@example.com'},
+            )
+
+        self.assertRedirects(response, reverse('password_reset_done'))
+        self.assertTrue(any(
+            'eligible_accounts=0' in entry
+            for entry in captured.output
+        ))
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(
+        EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+        EMAIL_DELIVERY_CONFIGURED=True,
+    )
     def test_password_reset_email_is_generated_and_confirm_flow_works(self):
-        response = self.client.post(
-            reverse('password_reset'),
-            {'email': self.user.email},
-        )
+        with self.assertLogs('core.forms', level='INFO') as captured:
+            response = self.client.post(
+                reverse('password_reset'),
+                {'email': self.user.email},
+            )
 
         self.assertRedirects(
             response,
             reverse('password_reset_done'),
+        )
+        self.assertTrue(any(
+            'eligible_accounts=1' in entry
+            for entry in captured.output
+        ))
+        self.assertNotIn(
+            self.user.email,
+            '\n'.join(captured.output),
         )
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('reset', mail.outbox[0].subject.lower())

@@ -115,12 +115,6 @@
                     Pricing
                 </a>
 
-                <a href="{% url 'contact' %}"
-                   {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}
-                   class="{% if request.resolver_match.url_name == 'contact' %}nav-current{% endif %}">
-                    Support
-                </a>
-
                 <a href="{% url 'login' %}"
                    class="nav-login-button {% if request.resolver_match.url_name == 'login' %}nav-current{% endif %}"
                    {% if request.resolver_match.url_name == 'login' %}aria-current="page"{% endif %}>
@@ -176,7 +170,9 @@
         <div>
             <a href="{% url 'about' %}">About</a>
             · <a href="{% url 'pricing' %}">Pricing</a>
-            · <a href="{% url 'contact' %}">Contact / Support</a>
+            {% if user.is_authenticated %}
+                · <a href="{% url 'contact' %}">Member Support</a>
+            {% endif %}
         </div>
 
     </footer>

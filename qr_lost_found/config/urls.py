@@ -3,7 +3,10 @@ from django.conf import settings
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
-from core.forms import EmailOrUsernameAuthenticationForm
+from core.forms import (
+    EmailOrUsernameAuthenticationForm,
+    ReturnLoopPasswordResetForm,
+)
 from core import views
 
 
@@ -44,6 +47,7 @@ urlpatterns = [
         'accounts/password-reset/',
         auth_views.PasswordResetView.as_view(
             template_name='registration/password_reset_form.html',
+            form_class=ReturnLoopPasswordResetForm,
             email_template_name='registration/password_reset_email.txt',
             html_email_template_name='registration/password_reset_email.html',
             subject_template_name='registration/password_reset_subject.txt',
