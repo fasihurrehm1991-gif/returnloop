@@ -85,7 +85,7 @@ select {
     justify-content: space-between;
     align-items: center;
 
-    padding: 16px 7%;
+    padding: 12px 5%;
 
     background: #c5dfcf;
     border-bottom: 1px solid #a9cbb6;
@@ -105,8 +105,8 @@ select {
 }
 
 .site-header .brand img {
-    width: 220px !important;
-    height: 65px !important;
+    width: 190px !important;
+    height: 55px !important;
     max-width: 100%;
     object-fit: contain;
     display: block;
@@ -115,14 +115,16 @@ select {
 .site-header nav {
     display: flex;
     align-items: center;
-    gap: 30px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 18px;
 }
 
 .site-header nav a,
 .nav-button {
     color: #174b37;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
 
     background: none;
@@ -493,6 +495,12 @@ footer {
 
     .site-header {
         padding: 18px 5%;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .site-header nav {
+        gap: 14px;
     }
 
     .steps {

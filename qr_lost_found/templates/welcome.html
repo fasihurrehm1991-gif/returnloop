@@ -30,7 +30,11 @@
                           letter-spacing: 3px;
                           font-size: 13px;">
 
-                    Welcome to ReturnLoop
+                    {% if user.is_authenticated %}
+                        Welcome back, {{ user.first_name|default:user.username }}
+                    {% else %}
+                        Welcome to ReturnLoop
+                    {% endif %}
 
                 </p>
 
@@ -48,37 +52,35 @@
                           font-size: 16px;
                           line-height: 1.8;">
 
-                    A smarter way to protect your belongings.
-                    Register as a student or staff member, request a sticker,
-                    and let an administrator issue and activate your unique QR.
-                    If someone finds your item, you'll receive a notification
-                    without exposing your contact details.
+                    {% if user.is_authenticated %}
+                        Check your dashboard for sticker orders and finder
+                        notifications. Your contact details stay private.
+                    {% else %}
+                        A smarter way to protect your belongings.
+                        Register as a student or staff member, request a sticker,
+                        and let an administrator issue and activate your unique QR.
+                        If someone finds your item, you'll receive a notification
+                        without exposing your contact details.
+                    {% endif %}
 
                 </p>
 
-                <div class="d-grid gap-3 col-md-8 mx-auto">
-
-                    <a href="{% url 'register' %}"
-                       class="btn btn-lg py-3 fw-bold text-white"
-                       style="background: #087f5b;
-                              border-radius: 12px;
-                              border: none;">
-
-                        Create an Account
-
-                    </a>
-
-                    <a href="{% url 'login' %}"
-                       class="btn btn-lg py-3 fw-bold"
-                       style="background: #e5f0e8;
-                              color: #07543e;
-                              border-radius: 12px;
-                              border: 1px solid #cbded1;">
-
-                        Already Have an Account? Login
-
-                    </a>
-
+                <div class="home-actions">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="home-action home-action-primary">
+                            Open Dashboard
+                        </a>
+                        <a href="{% url 'place_order' %}" class="home-action home-action-secondary">
+                            Order Stickers
+                        </a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="home-action home-action-primary">
+                            Create Account
+                        </a>
+                        <a href="{% url 'login' %}" class="home-action home-action-secondary">
+                            Log in
+                        </a>
+                    {% endif %}
                 </div>
 
                 <div class="mt-5 pt-3"
@@ -115,5 +117,60 @@
     </div>
 
 </section>
+
+<style>
+    .home-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin: 0 auto;
+    }
+
+    .home-action {
+        min-width: 190px;
+        padding: 13px 22px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .home-action:hover {
+        transform: translateY(-1px);
+    }
+
+    .home-action-primary {
+        background: #087f5b;
+        color: #fff;
+    }
+
+    .home-action-primary:hover {
+        background: #07543e;
+        color: #fff;
+    }
+
+    .home-action-secondary {
+        background: #e5f0e8;
+        border-color: #cbded1;
+        color: #07543e;
+    }
+
+    .home-action-secondary:hover {
+        background: #d7e9dc;
+        color: #07543e;
+    }
+
+    @media (max-width: 575px) {
+        .home-actions {
+            flex-direction: column;
+        }
+
+        .home-action {
+            width: 100%;
+        }
+    }
+</style>
 
 {% endblock %}

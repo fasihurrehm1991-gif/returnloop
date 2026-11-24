@@ -36,13 +36,9 @@
 
         <!-- Navigation -->
 
-        <nav>
+        <nav aria-label="Primary navigation">
 
             {% if user.is_authenticated %}
-
-                <a href="{% url 'home' %}">
-                    Home
-                </a>
 
                 <a href="{% url 'dashboard' %}">
                     Dashboard
@@ -56,12 +52,24 @@
                     My Profile
                 </a>
 
+                <a href="{% url 'pricing' %}">
+                    Pricing
+                </a>
+
+                <a href="{% url 'contact' %}">
+                    Support
+                </a>
+
                 <a href="{% url 'place_order' %}"
                    class="order-nav-button">
 
-                    + Order Stickers
+                    Order Stickers
 
                 </a>
+
+                {% if user.is_staff %}
+                    <a href="/admin/" class="admin-nav-link">Admin</a>
+                {% endif %}
 
                 <form method="post"
                       action="{% url 'logout' %}"
@@ -77,27 +85,26 @@
 
             {% else %}
 
-                <a href="{% url 'home' %}">
-                    Home
+                <a href="{% url 'about' %}">
+                    About
                 </a>
 
-                <a href="{% url 'register' %}">
-                    Register
+                <a href="{% url 'pricing' %}">
+                    Pricing
                 </a>
 
-                <a href="{% url 'login' %}">
-                    Login
+                <a href="{% url 'contact' %}">
+                    Support
                 </a>
 
+                <a href="{% url 'login' %}" class="nav-login-button">
+                    Log in
+                </a>
+
+                <a href="{% url 'register' %}" class="order-nav-button">
+                    Create Account
+                </a>
             {% endif %}
-
-            <a href="{% url 'about' %}">About</a>
-            <a href="{% url 'pricing' %}">Pricing</a>
-            <a href="{% url 'contact' %}">Contact / Support</a>
-
-            <a href="/admin/" class="admin-nav-link">
-                Admin Login
-            </a>
 
         </nav>
 
@@ -160,12 +167,13 @@
         .order-nav-button {
             background: #087f5b !important;
             color: white !important;
-            padding: 11px 18px !important;
-            border-radius: 10px !important;
-            font-weight: 600 !important;
+            padding: 10px 16px !important;
+            border-radius: 9px !important;
+            font-weight: 700 !important;
             text-decoration: none !important;
             transition: all 0.25s ease;
             display: inline-block;
+            white-space: nowrap;
         }
 
         .order-nav-button:hover {
@@ -185,6 +193,13 @@
 
         .admin-nav-link:hover {
             color: #087f5b !important;
+        }
+
+        .nav-login-button {
+            padding: 9px 14px !important;
+            border: 1px solid #9dbdaa !important;
+            border-radius: 9px;
+            white-space: nowrap;
         }
 
     </style>

@@ -33,6 +33,21 @@ class QRFlowTests(TestCase):
         )
         self.assertFalse(QRCode.objects.filter(user=new_user).exists())
 
+    def test_homepage_buttons_match_the_users_login_state(self):
+        guest_page = self.client.get(reverse('home'))
+        self.assertContains(guest_page, 'Create Account')
+        self.assertContains(guest_page, 'Log in')
+        self.assertNotContains(guest_page, 'Admin Login')
+
+        self.client.force_login(self.user)
+        member_page = self.client.get(reverse('home'))
+        self.assertContains(member_page, 'Welcome back')
+        self.assertContains(member_page, 'Open Dashboard')
+        self.assertContains(member_page, 'Order Stickers')
+        self.assertNotContains(member_page, 'Create Account')
+        self.assertNotContains(member_page, 'Already Have an Account')
+        self.assertNotContains(member_page, 'Admin Login')
+
     def test_inactive_qr_code_cannot_be_scanned(self):
         response = self.client.get(
             reverse('scan_qr', args=[self.qr.token])
