@@ -501,6 +501,14 @@ class QRFlowTests(TestCase):
                 response,
                 'Password reset email delivery is not configured yet.',
             )
+            self.assertContains(
+                response,
+                'This confirmation page also appears when no active',
+            )
+            self.assertContains(
+                response,
+                'again on this site.',
+            )
         else:
             self.assertContains(
                 response,
