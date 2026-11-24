@@ -38,6 +38,14 @@ class QRFlowTests(TestCase):
         self.assertContains(guest_page, 'Create Account')
         self.assertContains(guest_page, 'Log in')
         self.assertNotContains(guest_page, 'Admin Login')
+        self.assertEqual(
+            guest_page.content.count(b'href="/accounts/register/"'),
+            1,
+        )
+        self.assertEqual(
+            guest_page.content.count(b'href="/accounts/login/"'),
+            1,
+        )
 
         self.client.force_login(self.user)
         member_page = self.client.get(reverse('home'))
@@ -45,6 +53,7 @@ class QRFlowTests(TestCase):
         self.assertContains(member_page, 'Open Dashboard')
         self.assertContains(member_page, 'Order Stickers')
         self.assertNotContains(member_page, 'Create Account')
+        self.assertNotContains(member_page, 'Log in')
         self.assertNotContains(member_page, 'Already Have an Account')
         self.assertNotContains(member_page, 'Admin Login')
 
