@@ -3,6 +3,7 @@ from django.conf import settings
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
+from core.forms import EmailOrUsernameAuthenticationForm
 from core import views
 
 
@@ -22,6 +23,7 @@ urlpatterns = [
         'accounts/login/',
         auth_views.LoginView.as_view(
             template_name='registration/login.html',
+            form_class=EmailOrUsernameAuthenticationForm,
             redirect_authenticated_user=True
         ),
         name='login'

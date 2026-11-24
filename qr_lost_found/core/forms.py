@@ -1,7 +1,28 @@
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 
 from .models import UserProfile
+
+
+class EmailOrUsernameAuthenticationForm(AuthenticationForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = 'Username or email'
+        self.fields['username'].widget.attrs.update({
+            'placeholder': 'Enter your username or email',
+        })
+
+    def clean(self):
+        username = self.cleaned_data.get('username')
+
+        if username and not User.objects.filter(username=username).exists():
+            user = User.objects.filter(email__iexact=username).first()
+            if user:
+                self.cleaned_data['username'] = user.get_username()
+
+        return super().clean()
 
 
 class UserProfileForm(forms.ModelForm):

@@ -205,6 +205,16 @@ class QRFlowTests(TestCase):
         )
         self.assertTrue(login)
 
+    def test_login_accepts_username_or_email(self):
+        for identifier in (self.user.username, self.user.email.upper()):
+            with self.subTest(identifier_type='email' if '@' in identifier else 'username'):
+                self.client.logout()
+                response = self.client.post(reverse('login'), {
+                    'username': identifier,
+                    'password': 'Strong-Test-Password-123!',
+                })
+                self.assertRedirects(response, reverse('dashboard'))
+
     def test_password_reset_done_page_reports_email_delivery_status(self):
         response = self.client.get(reverse('password_reset_done'))
         configured = response.context['email_delivery_configured']
