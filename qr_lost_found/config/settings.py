@@ -202,7 +202,7 @@ EMAIL_DELIVERY_CONFIGURED = (
 
 DEFAULT_FROM_EMAIL = os.getenv(
     'DEFAULT_FROM_EMAIL',
-    'ReturnLoop <no-reply@returnloop.local>'
+    EMAIL_HOST_USER or 'ReturnLoop <no-reply@returnloop.local>'
 )
 
 EMAIL_TIMEOUT = 20
