@@ -481,6 +481,10 @@ class QRFlowTests(TestCase):
         self.assertTrue(login)
 
     def test_login_accepts_username_or_email(self):
+        login_page = self.client.get(reverse('login'))
+        self.assertContains(login_page, 'New to ReturnLoop?')
+        self.assertContains(login_page, 'href="/accounts/register/"')
+
         for identifier in (self.user.username, self.user.email.upper()):
             with self.subTest(identifier_type='email' if '@' in identifier else 'username'):
                 self.client.logout()

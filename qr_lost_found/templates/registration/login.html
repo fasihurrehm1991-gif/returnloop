@@ -200,6 +200,26 @@
         margin-top: 25px;
     }
 
+    .login-register {
+        margin-top: 22px;
+        padding-top: 19px;
+        border-top: 1px solid #e6eee8;
+        text-align: center;
+        color: #637b6e;
+        font-size: 14px;
+    }
+
+    .login-register a {
+        color: #087f5b;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .login-register a:hover {
+        color: #07543e;
+        text-decoration: underline;
+    }
+
     @media (max-width: 768px) {
 
         .login-wrapper {
@@ -327,6 +347,11 @@
 
             <div class="login-security">
                 🔒 Your account information is protected.
+            </div>
+
+            <div class="login-register">
+                New to ReturnLoop?
+                <a href="{% url 'register' %}">Create an account</a>
             </div>
 
         </div>
