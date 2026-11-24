@@ -16,6 +16,7 @@ django.setup()
 from django.core.management import call_command
 from django.core.wsgi import get_wsgi_application
 
+call_command('collectstatic', interactive=False, verbosity=0)
 call_command('migrate', interactive=False, verbosity=0)
 
 app = get_wsgi_application()

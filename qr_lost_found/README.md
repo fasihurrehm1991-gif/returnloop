@@ -47,3 +47,11 @@ python manage.py runserver
    `python manage.py createsuperuser`
 
 Render's free database/service limits can change. The free domain is HTTPS and is sufficient for testing.
+
+## Production email and database
+- Configure `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, and `DEFAULT_FROM_EMAIL` in the hosting provider's secret environment settings to deliver password-reset and finder notification emails. For Gmail, use a Google App Password, not the normal account password.
+- Without SMTP credentials, production does not send emails; the password-reset confirmation page explains this instead of claiming an email was sent.
+- Vercel's `/tmp` SQLite database is temporary and can lose accounts between function instances or restarts. Configure a persistent PostgreSQL `DATABASE_URL` before using the site for real accounts.
+
+## Tests
+Run the backend tests with `python manage.py test`.

@@ -110,7 +110,7 @@
 
                 {% for message in messages %}
 
-                    <div class="alert alert-success alert-dismissible fade show"
+                    <div class="alert {% if 'error' in message.tags %}alert-danger{% elif 'warning' in message.tags %}alert-warning{% elif 'info' in message.tags %}alert-info{% else %}alert-success{% endif %} alert-dismissible fade show"
                          role="alert">
 
                         {{ message }}

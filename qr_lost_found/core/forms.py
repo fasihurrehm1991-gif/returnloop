@@ -63,7 +63,9 @@ class UserProfileForm(forms.ModelForm):
             profile.save()
 
             self.user.email = self.cleaned_data['email']
-            self.user.first_name = profile.full_name
+            self.user.first_name, _, self.user.last_name = (
+                profile.full_name.partition(' ')
+            )
 
             self.user.save()
 

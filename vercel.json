@@ -15,6 +15,10 @@
       "handle": "filesystem"
     },
     {
+      "src": "/static/admin/(.*)",
+      "dest": "/qr_lost_found/api/index.py"
+    },
+    {
       "src": "/static/(.*)",
       "dest": "/qr_lost_found/static/$1"
     },

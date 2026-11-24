@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.conf import settings
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
@@ -41,7 +42,11 @@ urlpatterns = [
             email_template_name='registration/password_reset_email.txt',
             html_email_template_name='registration/password_reset_email.html',
             subject_template_name='registration/password_reset_subject.txt',
-            success_url='/accounts/password-reset/done/'
+            success_url='/accounts/password-reset/done/',
+            extra_context={
+                'email_delivery_configured':
+                    settings.EMAIL_DELIVERY_CONFIGURED,
+            }
         ),
         name='password_reset'
     ),

@@ -12,7 +12,10 @@ SECRET_KEY = os.getenv(
     'development-only-change-me'
 )
 
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+DEBUG = (
+    os.getenv('VERCEL') != '1'
+    and os.getenv('DEBUG', 'True').lower() == 'true'
+)
 
 ALLOWED_HOSTS = [
     x.strip()
@@ -141,7 +144,11 @@ USE_TZ = True
 # Static Files
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = (
+    Path('/tmp/returnloop-static')
+    if os.getenv('VERCEL') == '1'
+    else BASE_DIR / 'staticfiles'
+)
 STORAGES = {
     'default': {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
@@ -166,11 +173,6 @@ LOGOUT_REDIRECT_URL = 'home'
 
 
 # Email Configuration
-EMAIL_BACKEND = os.getenv(
-    'EMAIL_BACKEND',
-    'django.core.mail.backends.console.EmailBackend'
-)
-
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
@@ -183,6 +185,20 @@ EMAIL_USE_TLS = os.getenv(
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+
+if 'EMAIL_BACKEND' in os.environ:
+    EMAIL_BACKEND = os.environ['EMAIL_BACKEND']
+elif DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
+EMAIL_DELIVERY_CONFIGURED = (
+    EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend'
+    and bool(EMAIL_HOST_USER and EMAIL_HOST_PASSWORD)
+)
 
 DEFAULT_FROM_EMAIL = os.getenv(
     'DEFAULT_FROM_EMAIL',
@@ -199,7 +215,7 @@ X_FRAME_OPTIONS = 'DENY'
 if not DEBUG:
     SECURE_SSL_REDIRECT = os.getenv(
         'SECURE_SSL_REDIRECT',
-        'True'
+        'False' if os.getenv('VERCEL') == '1' else 'True'
     ).lower() == 'true'
     SECURE_HSTS_SECONDS = int(os.getenv(
         'SECURE_HSTS_SECONDS',

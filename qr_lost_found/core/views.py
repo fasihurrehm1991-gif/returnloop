@@ -1,4 +1,5 @@
 import logging
+import smtplib
 
 from django import forms
 from django.conf import settings
@@ -383,7 +384,7 @@ def scan_qr(request, token):
 
             owner_email = qr_code.user.email
 
-            if owner_email:
+            if owner_email and settings.EMAIL_DELIVERY_CONFIGURED:
 
                 owner_name = (
                     qr_code.user.get_full_name()
@@ -451,16 +452,37 @@ def scan_qr(request, token):
                             filename='returnloop-logo.png.png'
                         )
                         email.attach(logo)
+                except OSError:
+                    logger.warning(
+                        'ReturnLoop logo could not be attached to finder '
+                        'notification email for QR code %s',
+                        qr_code.token
+                    )
 
+                try:
                     email.send(fail_silently=False)
-                except Exception:
+                except (OSError, smtplib.SMTPException):
                     logger.exception(
                         'Could not send finder notification email '
                         'for QR code %s',
                         qr_code.token
                     )
+                    messages.warning(
+                        request,
+                        'Your message was saved, but the owner email '
+                        'could not be delivered.'
+                    )
+
+            elif not settings.EMAIL_DELIVERY_CONFIGURED:
+                messages.warning(
+                    request,
+                    'Your message was saved. Email alerts are not set up '
+                    'yet; the owner can still view it in their dashboard.'
+                )
 
             return render(request, 'finder_success.html')
+
+        messages.error(request, 'Please enter a message for the owner.')
 
     else:
 
