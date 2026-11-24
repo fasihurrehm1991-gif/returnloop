@@ -79,9 +79,9 @@
 
                 </a>
 
-                {% if user.is_staff %}
-                    <a href="/admin/" class="admin-nav-link">Admin</a>
-                {% endif %}
+                <a href="/admin/" class="admin-nav-link">
+                    Admin Login
+                </a>
 
                 <form method="post"
                       action="{% url 'logout' %}"
@@ -119,6 +119,10 @@
                    class="nav-login-button {% if request.resolver_match.url_name == 'login' %}nav-current{% endif %}"
                    {% if request.resolver_match.url_name == 'login' %}aria-current="page"{% endif %}>
                     Log in
+                </a>
+
+                <a href="/admin/" class="admin-nav-link">
+                    Admin Login
                 </a>
             {% endif %}
 
